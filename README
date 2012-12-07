@@ -10,6 +10,9 @@ Utilities
 
   * ecdsakeygen
     Generates a new key pair
+    TODO Given a private key, generate public key
+    TODO Write and read private key to/from file
+    TODO Output public key in machine readable format
 
   * ecdsasign
     Given a private key signs a 256-bit number.
