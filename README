@@ -1,0 +1,19 @@
+ECDSA Util
+==========
+
+based on libuecc[1]
+
+[1]: http://git.universe-factory.net/libuecc
+
+Utilities
+---------
+
+  * ecdsakeygen
+    Generates a new key pair
+
+  * ecdsasign
+    Given a private key signs a 256-bit number.
+
+  * ecdsaverify
+    Given a public key and a 256-bit number a signature is verified.
+    Exits with 0 on success.
