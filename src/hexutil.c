@@ -44,7 +44,7 @@ int parsehex(char *string, void *buffer, size_t len) {
       break;
   }
 
-  if (len != 0)
+  if (len != -1)
     return 0;
 
   return 1;
