@@ -4,4 +4,4 @@ add_executable(ecdsakeygen keygen.c hexutil.c)
 
 target_link_libraries(ecdsakeygen ${UECC_LIBRARY})
 
-install(TARGETS ecdsakeygen RUNTIME DESTINATION sbin)
+install(TARGETS ecdsakeygen RUNTIME DESTINATION bin)
