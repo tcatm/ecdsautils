@@ -61,17 +61,17 @@ void random_bytes(char *buffer, size_t len) {
 }
 
 void main(void) {
-  ecc_secret_key_256 secret_key;
-  ecc_public_key_256 public_key;
+  ecc_int_256 secret_key;
+  ecc_int_256 public_key;
 
-  random_bytes(secret_key.s, 32);
+  random_bytes(secret_key.p, 32);
 
-  ecc_25519_secret_sanitize(&secret_key, &secret_key);
+  ecc_25519_gf_sanitize_secret(&secret_key, &secret_key);
 
   ecc_25519_work work;
   ecc_25519_scalarmult_base(&work, &secret_key);
   ecc_25519_store(&public_key, &work);
 
-  printf("Secret: "); hexdump(stdout, secret_key.s, 32); puts("");
+  printf("Secret: "); hexdump(stdout, secret_key.p, 32); puts("");
   printf("Public: "); hexdump(stdout, public_key.p, 32); puts("");
 }
