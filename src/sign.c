@@ -30,7 +30,7 @@
 #include "hexutil.h"
 #include "random.h"
 
-void main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   ecc_int_256 secret, hash, k, krecip, r, s, tmp;
   ecc_25519_work kG;
 
@@ -86,4 +86,6 @@ void main(int argc, char *argv[]) {
   hexdump(stdout, r.p, 32);
   hexdump(stdout, s.p, 32);
   puts("");
+
+  return 0;
 }

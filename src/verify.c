@@ -48,7 +48,7 @@ int is_valid_pubkey(ecc_25519_work *pubkey) {
   return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
 }
 
-void main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   unsigned char signature[64];
   ecc_int_256 pubkey_packed, r, s, hash, tmp, w, u1, u2;
   ecc_25519_work pubkey, work, s1, s2;
@@ -94,8 +94,10 @@ void main(int argc, char *argv[]) {
 
   ecc_25519_gf_sub(&tmp, &r, &w);
 
-  if (ecc_25519_gf_is_zero(&tmp))
-    puts("Signature is valid"), exit(0);
+  if (!ecc_25519_gf_is_zero(&tmp))
+    error(1, 0, "Invalid signature");
 
-  error(1, 0, "Invalid signature");
+  puts("Signature is valid");
+
+  return 0;
 }

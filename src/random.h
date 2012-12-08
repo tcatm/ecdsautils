@@ -24,4 +24,4 @@
 */
 
 /* returns 1 on success, else 0 (contents of buffer will be undefined) */
-int random_bytes(char *buffer, size_t len);
+int random_bytes(unsigned char *buffer, size_t len);

@@ -31,7 +31,7 @@
 #include "hexutil.h"
 #include "random.h"
 
-void main(void) {
+int main(void) {
   ecc_int_256 secret_key;
   ecc_int_256 public_key;
 
@@ -46,4 +46,6 @@ void main(void) {
 
   printf("Secret: "); hexdump(stdout, secret_key.p, 32); puts("");
   printf("Public: "); hexdump(stdout, public_key.p, 32); puts("");
+
+  return 0;
 }

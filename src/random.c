@@ -31,7 +31,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-int random_bytes(char *buffer, size_t len) {
+int random_bytes(unsigned char *buffer, size_t len) {
   int fd;
   size_t read_bytes = 0;
 

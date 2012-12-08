@@ -50,7 +50,7 @@ int parsehex(char *string, void *buffer, size_t len) {
   return 1;
 }
 
-void hexdump(FILE *stream, char *buffer, size_t len) {
+void hexdump(FILE *stream, unsigned char *buffer, size_t len) {
   while (len--)
     fprintf(stream, "%02hhx", *(buffer++));
 }

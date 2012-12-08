@@ -31,5 +31,5 @@ int parsehex(char *string, void *buffer, size_t len);
 
 /* Converts a byte array to a hexadecimal string.
  */
-void hexdump(FILE *stream, char *buffer, size_t len);
+void hexdump(FILE *stream, unsigned char *buffer, size_t len);
 
