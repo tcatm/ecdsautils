@@ -72,6 +72,9 @@ void main(int argc, char *argv[]) {
   if (!parsehex(argv[2], hash.p, 32))
     error(1, 0, "Error while reading hash");
 
+  // hash must have only 253 significant bits!
+  hash.p[0] &= 0xf8;
+
   while (1) {
     // genarate random k
     random_bytes(k.p, 32);
@@ -84,7 +87,7 @@ void main(int argc, char *argv[]) {
     ecc_25519_scalarmult_base(&kG, &k);
 
     // store x coordinate of kG in r
-    ecc_25519_store_xy(&r, &tmp, &kG);
+    ecc_25519_store_xy(&r, 0, &kG);
 
     if (ecc_25519_gf_is_zero(&r))
       continue;
