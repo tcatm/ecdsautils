@@ -60,7 +60,8 @@ int main(int argc, char *argv[]) {
     ecc_25519_scalarmult_base(&kG, &k);
 
     // store x coordinate of kG in r
-    ecc_25519_store_xy(&r, 0, &kG);
+    ecc_25519_store_xy(&tmp, 0, &kG);
+    ecc_25519_gf_reduce(&r, &tmp);
 
     if (ecc_25519_gf_is_zero(&r))
       continue;
