@@ -28,7 +28,7 @@
 
 int parsehex(char *string, void *buffer, size_t len) {
   // number of digits must be even
-  if (strlen(string) & 1 != 1)
+  if ((strlen(string) & 1) == 1)
     return 0;
 
   // number of digits must be 2 * len
