@@ -31,18 +31,11 @@
 
 #include "hexutil.h"
 
-const unsigned char q[32] = {
-  0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
-  0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10
-};
-
 int is_valid_pubkey(ecc_25519_work *pubkey) {
   ecc_25519_work work;
 
   // q * pubkey should be identity element
-  ecc_25519_scalarmult(&work, *(const void*[]){q}, pubkey);
+  ecc_25519_scalarmult(&work, &ecc_25519_gf_order, pubkey);
 
   // FIXME: Check whether pubkey lies on curve?
   return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
