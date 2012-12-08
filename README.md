@@ -18,7 +18,7 @@ Binaries will be in `build/src`.
 Signature Format
 ----------------
 
-concat . map tohexstring [r, s]
+concat $ map tohexstring [r, s]
 
 Utilities
 ---------
