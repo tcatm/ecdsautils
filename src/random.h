@@ -1,6 +1,5 @@
 /*
   Copyright (c) 2012, Nils Schneider <nils@nilsschneider.net>
-  and Matthias Schiffer <mschiffer@universe-factory.net>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -24,26 +23,5 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <error.h>
-#include <stdio.h>
-#include <libuecc/ecc.h>
-
-#include "hexutil.h"
-#include "random.h"
-
-void main(void) {
-  ecc_int_256 secret_key;
-  ecc_int_256 public_key;
-
-  if (!random_bytes(secret_key.p, 32))
-    error(1, 0, "Unable to read random bytes");
-
-  ecc_25519_gf_sanitize_secret(&secret_key, &secret_key);
-
-  ecc_25519_work work;
-  ecc_25519_scalarmult_base(&work, &secret_key);
-  ecc_25519_store(&public_key, &work);
-
-  printf("Secret: "); hexdump(stdout, secret_key.p, 32); puts("");
-  printf("Public: "); hexdump(stdout, public_key.p, 32); puts("");
-}
+/* returns 1 on success, else 0 (contents of buffer will be undefined) */
+int random_bytes(char *buffer, size_t len);

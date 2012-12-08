@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2012, Nils Schneider <nils@nilsschneider.net>
+  and Matthias Schiffer <mschiffer@universe-factory.net>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -23,67 +24,43 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <error.h>
 #include <stdio.h>
-#include <libuecc/ecc.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
 
-#include "hexutil.h"
-#include "random.h"
+int random_bytes(char *buffer, size_t len) {
+  int fd;
+  size_t read_bytes = 0;
 
-void main(int argc, char *argv[]) {
-  ecc_int_256 secret, hash, k, krecip, r, s, tmp;
-  ecc_25519_work kG;
+  fd = open("/dev/random", O_RDONLY);
 
-  if (argc != 3)
-    error(1, 0, "Usage: %s secret hash", argv[0]);
-
-  if (!parsehex(argv[1], secret.p, 32))
-    error(1, 0, "Error while reading secret");
-
-  if (!parsehex(argv[2], hash.p, 32))
-    error(1, 0, "Error while reading hash");
-
-  // hash must have only 253 significant bits!
-  hash.p[0] &= 0xf8;
-
-  while (1) {
-    // genarate random k
-    if (!random_bytes(k.p, 32))
-      error(1, 0, "Unable to read random bytes");
-
-    ecc_25519_gf_sanitize_secret(&k, &k);
-
-    // calculate k^(-1)
-    ecc_25519_gf_recip(&krecip, &k);
-
-    // calculate kG = k * base point
-    ecc_25519_scalarmult_base(&kG, &k);
-
-    // store x coordinate of kG in r
-    ecc_25519_store_xy(&r, 0, &kG);
-
-    if (ecc_25519_gf_is_zero(&r))
-      continue;
-
-    // tmp = r * secret
-    ecc_25519_gf_mult(&tmp, &r, &secret);
-
-    // s = hash + tmp = hash + r * secret
-    ecc_25519_gf_add(&s, &hash, &tmp);
-
-    // tmp = krecip * s = k^(-1) * s
-    ecc_25519_gf_mult(&tmp, &krecip, &s);
-
-    // mod n (order of G)
-    ecc_25519_gf_reduce(&s, &tmp);
-
-    if (ecc_25519_gf_is_zero(&s))
-      continue;
-
-    break;
+  if (fd < 0) {
+    fprintf(stderr, "Can't open /dev/random: %s\n", strerror(errno));
+    goto out_error;
   }
 
-  hexdump(stdout, r.p, 32);
-  hexdump(stdout, s.p, 32);
-  puts("");
+  while (read_bytes < len) {
+    ssize_t ret = read(fd, buffer + read_bytes, len - read_bytes);
+
+    if (ret < 0) {
+      if (errno == EINTR)
+        continue;
+
+       fprintf(stderr, "Unable to read random bytes: %s\n", strerror(errno));
+       goto out_error;
+    }
+
+    read_bytes += ret;
+  }
+
+  close(fd);
+  return 1;
+
+out_error:
+  close(fd);
+  return 0;
 }
+
