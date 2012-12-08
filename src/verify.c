@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
   ecc_25519_add(&work, &s1, &s2);
 
-  ecc_25519_store_xy(&w, 0, &work);
+  ecc_25519_store_xy(&w, NULL, &work);
 
   ecc_25519_gf_sub(&tmp, &r, &w);
 
