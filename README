@@ -5,6 +5,11 @@ based on libuecc[1]
 
 [1]: http://git.universe-factory.net/libuecc
 
+Signature Format
+----------------
+
+concat . map tohexstring [r, s]
+
 Utilities
 ---------
 
