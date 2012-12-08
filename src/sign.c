@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     error(1, 0, "Error while reading hash");
 
   // hash must have only 253 significant bits!
-  hash.p[0] &= 0xf8;
+  hash.p[31] &= 0x1f;
 
   while (1) {
     // genarate random k

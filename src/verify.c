@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
   memcpy(s.p, signature+32, 32);
 
   // hash must have only 253 significant bits!
-  hash.p[0] &= 0xf8;
+  hash.p[31] &= 0x1f;
 
   ecc_25519_load_packed(&pubkey, &pubkey_packed);
 
