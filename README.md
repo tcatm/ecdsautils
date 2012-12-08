@@ -5,6 +5,16 @@ based on libuecc[1]
 
 [1]: http://git.universe-factory.net/libuecc
 
+Building
+--------
+
+   mkdir build
+   cd build
+   cmake ..
+   make
+
+Binaries will be in `build/src`.
+
 Signature Format
 ----------------
 
