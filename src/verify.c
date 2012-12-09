@@ -71,14 +71,9 @@ int main(int argc, char *argv[]) {
   if (!is_valid_pubkey(&pubkey))
     error(1, 0, "Invalid pubkey");
 
-  ecc_25519_gf_recip(&tmp, &s);
-  ecc_25519_gf_reduce(&w, &tmp);
-
-  ecc_25519_gf_mult(&tmp, &hash, &w);
-  ecc_25519_gf_reduce(&u1, &tmp);
-
-  ecc_25519_gf_mult(&tmp, &r, &w);
-  ecc_25519_gf_reduce(&u2, &tmp);
+  ecc_25519_gf_recip(&w, &s);
+  ecc_25519_gf_mult(&u1, &hash, &w);
+  ecc_25519_gf_mult(&u2, &r, &w);
 
   ecc_25519_scalarmult_base(&s1, &u1);
   ecc_25519_scalarmult(&s2, &u2, &pubkey);
