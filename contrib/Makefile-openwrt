@@ -7,7 +7,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=ecdsautil
+PKG_NAME:=ecdsautils
 PKG_VERSION:=0.1
 PKG_RELEASE:=1
 
@@ -20,27 +20,27 @@ PKG_BUILD_DEPENDS:=libuecc
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
-define Package/ecdsautil
+define Package/ecdsautils
   SECTION:=utils
   CATEGORY:=Utilities
   DEPENDS:=
   TITLE:=Sign checksums and verify ECDSA signatures. 
-  URL:=https://github.com/tcatm/ecdsautil
+  URL:=https://github.com/tcatm/ecdsautils
 endef
 
 CMAKE_OPTIONS += \
 	-DCMAKE_BUILD_TYPE:String="MINSIZEREL" \
 
 
-define Package/ecdsautil/description
+define Package/ecdsautils/description
  Utilities to sign and verify checksums using ECDSA.
 endef
 
-define Package/ecdsautil/install
+define Package/ecdsautils/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ecdsakeygen $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ecdsasign $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ecdsaverify $(1)/usr/bin/
 endef
 
-$(eval $(call BuildPackage,ecdsautil))
+$(eval $(call BuildPackage,ecdsautils))
