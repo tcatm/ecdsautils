@@ -51,13 +51,13 @@ int main(int argc, char *argv[]) {
   if (argc != 4)
     error(1, 0, "Usage: %s pubkey signature hash", argv[0]);
 
-  if (!parsehex(argv[1], pubkey_packed.p, 32))
+  if (!parsehex(pubkey_packed.p, argv[1], 32))
     error(1, 0, "Error while reading pubkey");
 
-  if (!parsehex(argv[2], signature, 64))
+  if (!parsehex(signature, argv[2], 64))
     error(1, 0, "Error while reading signature");
 
-  if (!parsehex(argv[3], hash.p, 32))
+  if (!parsehex(hash.p, argv[3], 32))
     error(1, 0, "Error while reading hash");
 
   memcpy(r.p, signature, 32);

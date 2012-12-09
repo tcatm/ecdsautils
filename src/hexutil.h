@@ -27,7 +27,7 @@
  * In order for this function to return successfully the decoded string
  * must fit exactly into the buffer.
  */
-int parsehex(char *string, void *buffer, size_t len);
+int parsehex(void *buffer, char *string, size_t len);
 
 /* Converts a byte array to a hexadecimal string.
  */

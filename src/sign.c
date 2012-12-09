@@ -37,10 +37,10 @@ int main(int argc, char *argv[]) {
   if (argc != 3)
     error(1, 0, "Usage: %s secret hash", argv[0]);
 
-  if (!parsehex(argv[1], secret.p, 32))
+  if (!parsehex(secret.p, argv[1], 32))
     error(1, 0, "Error while reading secret");
 
-  if (!parsehex(argv[2], hash.p, 32))
+  if (!parsehex(hash.p, argv[2], 32))
     error(1, 0, "Error while reading hash");
 
   // hash must have only 253 significant bits!
