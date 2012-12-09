@@ -1,9 +1,10 @@
 ECDSA Util
 ==========
 
-based on libuecc[1]
+Requirements
+------------
 
-[1]: http://git.universe-factory.net/libuecc
+  * libuecc: http://git.universe-factory.net/libuecc
 
 Building
 --------
@@ -23,11 +24,24 @@ concat $ map tohexstring [r, s]
 Utilities
 ---------
 
-  * ecdsakeygen  
-    Generates a new key pair  
-    TODO Given a private key, generate public key  
-    TODO Write and read private key to/from file  
-    TODO Output public key in machine readable format  
+### ecdsakeygen
+
+#### Generate a new private key
+
+The secret is written to stdout.
+
+    ecdsakeygen -n
+
+#### Calculate public key given a private key
+
+The secret should be supplied on stdin. The public key will be written to
+stdout.
+
+    ecdsakeygen -p
+
+TODO Given a private key, generate public key  
+TODO Write and read private key to/from file  
+TODO Output public key in machine readable format  
 
   * ecdsasign  
     Given a private key signs a 256-bit number.
