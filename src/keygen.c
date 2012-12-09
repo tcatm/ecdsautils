@@ -1,6 +1,5 @@
 /*
   Copyright (c) 2012, Nils Schneider <nils@nilsschneider.net>
-  and Matthias Schiffer <mschiffer@universe-factory.net>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
