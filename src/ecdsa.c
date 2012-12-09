@@ -23,7 +23,15 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stddef.h>
+#include <libuecc/ecc.h>
 
-/* returns 1 on success, else 0 (contents of buffer will be undefined) */
-int random_bytes(unsigned char *buffer, size_t len);
+#include "random.h"
+
+int ecdsa_new_secret(ecc_int_256 *secret) {
+  if (!random_bytes(secret->p, 32))
+    return 0;
+
+  ecc_25519_gf_sanitize_secret(secret, secret);
+
+  return 1;
+}

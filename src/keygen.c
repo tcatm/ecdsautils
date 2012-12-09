@@ -29,16 +29,14 @@
 #include <libuecc/ecc.h>
 
 #include "hexutil.h"
-#include "random.h"
+#include "ecdsa.h"
 
 int main(void) {
   ecc_int_256 secret_key;
   ecc_int_256 public_key;
 
-  if (!random_bytes(secret_key.p, 32))
+  if (!ecdsa_new_secret(&secret_key))
     error(1, 0, "Unable to read random bytes");
-
-  ecc_25519_gf_sanitize_secret(&secret_key, &secret_key);
 
   ecc_25519_work work;
   ecc_25519_scalarmult_base(&work, &secret_key);

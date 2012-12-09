@@ -28,7 +28,7 @@
 #include <libuecc/ecc.h>
 
 #include "hexutil.h"
-#include "random.h"
+#include "ecdsa.h"
 
 int main(int argc, char *argv[]) {
   ecc_int_256 secret, hash, k, krecip, r, s, tmp;
@@ -48,10 +48,8 @@ int main(int argc, char *argv[]) {
 
   while (1) {
     // genarate random k
-    if (!random_bytes(k.p, 32))
+    if (!ecdsa_new_secret(&k))
       error(1, 0, "Unable to read random bytes");
-
-    ecc_25519_gf_sanitize_secret(&k, &k);
 
     // calculate k^(-1)
     ecc_25519_gf_recip(&krecip, &k);

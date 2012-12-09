@@ -23,7 +23,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stddef.h>
-
-/* returns 1 on success, else 0 (contents of buffer will be undefined) */
-int random_bytes(unsigned char *buffer, size_t len);
+/* Generates a new secret key.
+ * 1 on success, else 0
+ */
+int ecdsa_new_secret(ecc_int_256 *secret);
