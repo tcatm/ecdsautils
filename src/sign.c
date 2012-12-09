@@ -40,11 +40,11 @@ int main(int argc, char *argv[]) {
   if (!parsehex(secret.p, argv[1], 32))
     error(1, 0, "Error while reading secret");
 
-  if (!parsehex(hash.p, argv[2], 32))
+  if (!parsehex(tmp.p, argv[2], 32))
     error(1, 0, "Error while reading hash");
 
-  // hash must have only 253 significant bits!
-  hash.p[31] &= 0x1f;
+  // Reduce hash (instead of clearing 3 bits)
+  ecc_25519_gf_reduce(&hash, &tmp);
 
   while (1) {
     // genarate random k
