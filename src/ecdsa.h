@@ -27,3 +27,5 @@
  * 1 on success, else 0
  */
 int ecdsa_new_secret(ecc_int_256 *secret);
+
+void ecdsa_public_from_secret(ecc_int_256 *pub, ecc_int_256 *secret);

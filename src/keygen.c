@@ -38,9 +38,7 @@ int main(void) {
   if (!ecdsa_new_secret(&secret_key))
     error(1, 0, "Unable to read random bytes");
 
-  ecc_25519_work work;
-  ecc_25519_scalarmult_base(&work, &secret_key);
-  ecc_25519_store_packed(&public_key, &work);
+  ecdsa_public_from_secret(&public_key, &secret_key);
 
   printf("Secret: "); hexdump(stdout, secret_key.p, 32); puts("");
   printf("Public: "); hexdump(stdout, public_key.p, 32); puts("");

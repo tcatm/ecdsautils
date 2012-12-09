@@ -35,3 +35,9 @@ int ecdsa_new_secret(ecc_int_256 *secret) {
 
   return 1;
 }
+
+void ecdsa_public_from_secret(ecc_int_256 *pub, ecc_int_256 *secret) {
+  ecc_25519_work work;
+  ecc_25519_scalarmult_base(&work, secret);
+  ecc_25519_store_packed(pub, &work);
+}
