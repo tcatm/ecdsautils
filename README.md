@@ -30,7 +30,7 @@ Utilities
 
 The secret is written to stdout.
 
-    ecdsakeygen -n
+    ecdsakeygen -s
 
 #### Calculate public key given a private key
 
