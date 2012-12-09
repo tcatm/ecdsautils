@@ -42,7 +42,7 @@ int main(void) {
 
   ecc_25519_work work;
   ecc_25519_scalarmult_base(&work, &secret_key);
-  ecc_25519_store(&public_key, &work);
+  ecc_25519_store_packed(&public_key, &work);
 
   printf("Secret: "); hexdump(stdout, secret_key.p, 32); puts("");
   printf("Public: "); hexdump(stdout, public_key.p, 32); puts("");
