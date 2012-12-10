@@ -25,22 +25,75 @@
 
 #include <error.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <getopt.h>
 #include <libuecc/ecc.h>
 
 #include "hexutil.h"
 #include "ecdsa.h"
 
-int main(void) {
-  ecc_int_256 secret_key;
-  ecc_int_256 public_key;
+void output_key(ecc_int_256 *key) {
+  hexdump(stdout, key->p, 32); puts("");
+}
 
-  if (!ecdsa_new_secret(&secret_key))
+void show_pubkey() {
+  char secret_string[65];
+  ecc_int_256 pubkey, secret;
+
+  if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
+    goto secret_error;
+
+  if (!parsehex(secret.p, secret_string, 32))
+    goto secret_error;
+
+  ecdsa_public_from_secret(&pubkey, &secret);
+
+  output_key(&pubkey);
+  return;
+
+secret_error:
+  error(1, 0, "Error reading secret");
+  return;
+}
+
+void new_secret() {
+  ecc_int_256 secret;
+
+  if (!ecdsa_new_secret(&secret))
     error(1, 0, "Unable to read random bytes");
 
-  ecdsa_public_from_secret(&public_key, &secret_key);
+  output_key(&secret);
+}
 
-  printf("Secret: "); hexdump(stdout, secret_key.p, 32); puts("");
-  printf("Public: "); hexdump(stdout, public_key.p, 32); puts("");
+void usage(char *cmdname) {
+  printf("Usage: %s [-s] [-p] [-h]\n", cmdname);
+}
 
-  return 0;
+void help(char *cmdname) {
+  usage(cmdname);
+  puts("\t-s\tgenerate a new secret on stdout");
+  puts("\t-p\toutput public key of secret read from stdin");
+  puts("\t-h\tdisplay this short help and exit");
+}
+
+int main(int argc, char **argv) {
+  char c;
+
+  while ((c = getopt(argc, argv, "sph")) != -1) {
+    switch (c) {
+      case 's':
+        new_secret();
+        return 0;
+      case 'p':
+        show_pubkey();
+        return 0;
+      case 'h':
+        help(argv[0]);
+        return 0;
+    }
+  }
+
+  usage(argv[0]);
+  return 1;
 }
