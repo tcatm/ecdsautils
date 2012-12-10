@@ -49,16 +49,16 @@ int main(int argc, char *argv[]) {
   ecc_25519_work pubkey, work, s1, s2;
 
   if (argc != 4)
-    error(1, 0, "Usage: %s pubkey signature hash", argv[0]);
+    error(1, 0, "Usage: %s hash signature pubkey", argv[0]);
 
-  if (!parsehex(pubkey_packed.p, argv[1], 32))
-    error(1, 0, "Error while reading pubkey");
+  if (!parsehex(tmp.p, argv[1], 32))
+    error(1, 0, "Error while reading hash");
 
   if (!parsehex(signature, argv[2], 64))
     error(1, 0, "Error while reading signature");
 
-  if (!parsehex(tmp.p, argv[3], 32))
-    error(1, 0, "Error while reading hash");
+  if (!parsehex(pubkey_packed.p, argv[3], 32))
+    error(1, 0, "Error while reading pubkey");
 
   memcpy(r.p, signature, 32);
   memcpy(s.p, signature+32, 32);
