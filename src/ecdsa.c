@@ -27,6 +27,7 @@
 #include <libuecc/ecc.h>
 
 #include "random.h"
+#include "ecdsa.h"
 
 int ecdsa_new_secret(ecc_int_256 *secret) {
   if (!random_bytes(secret->p, 32))
@@ -60,3 +61,28 @@ void ecdsa_split_signature(ecc_int_256 *r, ecc_int_256 *s, unsigned char *signat
   memcpy(s->p, signature+32, 32);
 }
 
+void ecdsa_verify_prepare(ecdsa_verify_context *ctx, ecc_int_256 *hash, unsigned char *signature) {
+  ecc_int_256 tmp, w, u1;
+
+  ecdsa_split_signature(&ctx->r, &tmp, signature);
+  ecc_25519_gf_recip(&w, &tmp);
+
+  ecc_25519_gf_reduce(&tmp, hash);
+
+  ecc_25519_gf_mult(&u1, &tmp, &w);
+  ecc_25519_gf_mult(&ctx->u2, &ctx->r, &w);
+
+  ecc_25519_scalarmult_base(&ctx->s1, &u1);
+}
+
+int ecdsa_verify_with_pubkey(ecdsa_verify_context *ctx, ecc_25519_work *pubkey) {
+  ecc_25519_work s2, work;
+  ecc_int_256 w, tmp;
+
+  ecc_25519_scalarmult(&s2, &ctx->u2, pubkey);
+  ecc_25519_add(&work, &ctx->s1, &s2);
+  ecc_25519_store_xy(&w, NULL, &work);
+  ecc_25519_gf_sub(&tmp, &ctx->r, &w);
+
+  return ecc_25519_gf_is_zero(&tmp);
+}

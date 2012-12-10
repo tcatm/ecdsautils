@@ -35,8 +35,9 @@
 
 int main(int argc, char *argv[]) {
   unsigned char signature[64];
-  ecc_int_256 pubkey_packed, r, s, hash, tmp, w, u1, u2;
-  ecc_25519_work pubkey, work, s1, s2;
+  ecdsa_verify_context ctx;
+  ecc_int_256 pubkey_packed, tmp;
+  ecc_25519_work pubkey;
 
   if (argc < 4)
     error(1, 0, "Usage: %s file signature pubkey1 [pubkey2 ...]", argv[0]);
@@ -47,16 +48,8 @@ int main(int argc, char *argv[]) {
   if (!parsehex(signature, argv[2], 64))
     error(1, 0, "Error while reading signature");
 
-  ecdsa_split_signature(&r, &s, signature);
 
-  // Reduce hash (instead of clearing 3 bits)
-  ecc_25519_gf_reduce(&hash, &tmp);
-
-  ecc_25519_gf_recip(&w, &s);
-  ecc_25519_gf_mult(&u1, &hash, &w);
-  ecc_25519_gf_mult(&u2, &r, &w);
-
-  ecc_25519_scalarmult_base(&s1, &u1);
+  ecdsa_verify_prepare(&ctx, &tmp, signature);
 
   for (int i = 3; i < argc; i++) {
     char *pubkey_string = argv[i];
@@ -73,12 +66,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    ecc_25519_scalarmult(&s2, &u2, &pubkey);
-    ecc_25519_add(&work, &s1, &s2);
-    ecc_25519_store_xy(&w, NULL, &work);
-    ecc_25519_gf_sub(&tmp, &r, &w);
-
-    if (ecc_25519_gf_is_zero(&tmp)) {
+    if (ecdsa_verify_with_pubkey(&ctx, &pubkey)) {
       printf("Signature verified by %s\n", pubkey_string);
       exit(0);
     }
