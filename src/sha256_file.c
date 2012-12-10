@@ -23,69 +23,53 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <error.h>
 #include <stdio.h>
-#include <libuecc/ecc.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
 
-#include "hexutil.h"
-#include "ecdsa.h"
-#include "sha256_file.h"
+#include "sha256sum.h"
 
-int main(int argc, char *argv[]) {
-  ecc_int_256 secret, hash, k, krecip, r, s, tmp;
-  ecc_25519_work kG;
+#define BLOCKSIZE 64
 
-  if (argc != 3)
-    error(1, 0, "Usage: %s secret file", argv[0]);
+int sha256_file(char *fname, unsigned char *hash) {
+  int fd;
 
-  if (!parsehex(secret.p, argv[1], 32))
-    error(1, 0, "Error while reading secret");
+  fd = open(fname, O_RDONLY);
 
-  if (!sha256_file(argv[2], tmp.p))
-    error(1, 0, "Error while hashing file");
-
-  // Reduce hash (instead of clearing 3 bits)
-  ecc_25519_gf_reduce(&hash, &tmp);
-
-  while (1) {
-    // genarate random k
-    if (!ecdsa_new_secret(&k))
-      error(1, 0, "Unable to read random bytes");
-
-    // calculate k^(-1)
-    ecc_25519_gf_recip(&krecip, &k);
-
-    // calculate kG = k * base point
-    ecc_25519_scalarmult_base(&kG, &k);
-
-    // store x coordinate of kG in r
-    ecc_25519_store_xy(&tmp, NULL, &kG);
-    ecc_25519_gf_reduce(&r, &tmp);
-
-    if (ecc_25519_gf_is_zero(&r))
-      continue;
-
-    // tmp = r * secret
-    ecc_25519_gf_mult(&tmp, &r, &secret);
-
-    // s = hash + tmp = hash + r * secret
-    ecc_25519_gf_add(&s, &hash, &tmp);
-
-    // tmp = krecip * s = k^(-1) * s
-    ecc_25519_gf_mult(&tmp, &krecip, &s);
-
-    // mod n (order of G)
-    ecc_25519_gf_reduce(&s, &tmp);
-
-    if (ecc_25519_gf_is_zero(&s))
-      continue;
-
-    break;
+  if (fd < 0) {
+    fprintf(stderr, "Can't open file: %s\n", strerror(errno));
+    goto out_error;
   }
 
-  hexdump(stdout, r.p, 32);
-  hexdump(stdout, s.p, 32);
-  puts("");
+  ssize_t ret;
+  unsigned char buffer[BLOCKSIZE];
+  SHA256Context ctx;
 
+  SHA256Init(&ctx);
+
+  do {
+    ret = read(fd, buffer, BLOCKSIZE);
+
+    if (ret < 0) {
+      if (errno == EINTR)
+        continue;
+
+       fprintf(stderr, "Unable to read file: %s\n", strerror(errno));
+       goto out_error;
+    }
+
+    SHA256Update(&ctx, buffer, ret);
+  } while (ret == BLOCKSIZE);
+
+  SHA256Final(&ctx, hash);
+
+  close(fd);
+  return 1;
+
+out_error:
+  close(fd);
   return 0;
 }
+

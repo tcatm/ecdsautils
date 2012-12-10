@@ -30,6 +30,7 @@
 #include <libuecc/ecc.h>
 
 #include "hexutil.h"
+#include "sha256_file.h"
 
 int is_valid_pubkey(ecc_25519_work *pubkey) {
   ecc_25519_work work;
@@ -49,10 +50,10 @@ int main(int argc, char *argv[]) {
   ecc_25519_work pubkey, work, s1, s2;
 
   if (argc < 4)
-    error(1, 0, "Usage: %s hash signature pubkey1 [pubkey2 ...]", argv[0]);
+    error(1, 0, "Usage: %s file signature pubkey1 [pubkey2 ...]", argv[0]);
 
-  if (!parsehex(tmp.p, argv[1], 32))
-    error(1, 0, "Error while reading hash");
+  if (!sha256_file(argv[1], tmp.p))
+    error(1, 0, "Error while hashing file");
 
   if (!parsehex(signature, argv[2], 64))
     error(1, 0, "Error while reading signature");
