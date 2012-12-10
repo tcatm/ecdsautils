@@ -35,14 +35,19 @@ int main(int argc, char *argv[]) {
   ecc_int_256 secret, hash, k, krecip, r, s, tmp;
   ecc_25519_work kG;
 
-  if (argc != 3)
-    error(1, 0, "Usage: %s secret file", argv[0]);
+  if (argc != 2)
+    error(1, 0, "Usage: %s file (secret is read from stdin)", argv[0]);
 
-  if (!parsehex(secret.p, argv[1], 32))
-    error(1, 0, "Error while reading secret");
-
-  if (!sha256_file(argv[2], tmp.p))
+  if (!sha256_file(argv[1], tmp.p))
     error(1, 0, "Error while hashing file");
+
+  char secret_string[65];
+
+  if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
+    error(1, 0, "Error reading secret");
+
+  if (!parsehex(secret.p, secret_string, 32))
+    error(1, 0, "Error reading secret");
 
   // Reduce hash (instead of clearing 3 bits)
   ecc_25519_gf_reduce(&hash, &tmp);
