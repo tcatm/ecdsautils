@@ -1,3 +1,9 @@
+INCLUDE(TestBigEndian)
+TEST_BIG_ENDIAN(BIGENDIAN)
+IF(${BIGENDIAN})
+  ADD_DEFINITIONS(-DWORDS_BIGENDIAN)
+ENDIF(${BIGENDIAN})
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ECDSAUTIL_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${UECC_INCLUDE_DIR})
 
 add_executable(ecdsakeygen keygen.c hexutil.c random.c ecdsa.c)
