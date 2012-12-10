@@ -43,7 +43,7 @@ void ecdsa_public_from_secret(ecc_int_256 *pub, ecc_int_256 *secret) {
   ecc_25519_store_packed(pub, &work);
 }
 
-int is_valid_pubkey(ecc_25519_work *pubkey) {
+int ecdsa_is_valid_pubkey(ecc_25519_work *pubkey) {
   ecc_25519_work work;
 
   // q * pubkey should be identity element

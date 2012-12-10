@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
     ecc_25519_load_packed(&pubkey, &pubkey_packed);
 
-    if (!is_valid_pubkey(&pubkey)) {
+    if (!ecdsa_is_valid_pubkey(&pubkey)) {
       fprintf(stderr, "Invalid pubkey %s\n", pubkey_string);
       continue;
     }
