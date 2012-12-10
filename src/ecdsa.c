@@ -41,3 +41,15 @@ void ecdsa_public_from_secret(ecc_int_256 *pub, ecc_int_256 *secret) {
   ecc_25519_scalarmult_base(&work, secret);
   ecc_25519_store_packed(pub, &work);
 }
+
+int is_valid_pubkey(ecc_25519_work *pubkey) {
+  ecc_25519_work work;
+
+  // q * pubkey should be identity element
+  ecc_25519_scalarmult(&work, &ecc_25519_gf_order, pubkey);
+
+  // FIXME: Check whether pubkey lies on curve?
+  //        If the point was unpacked, it is guaranteed to
+  //        lie on the curve.
+  return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
+}

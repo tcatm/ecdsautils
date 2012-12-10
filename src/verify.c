@@ -31,18 +31,7 @@
 
 #include "hexutil.h"
 #include "sha256_file.h"
-
-int is_valid_pubkey(ecc_25519_work *pubkey) {
-  ecc_25519_work work;
-
-  // q * pubkey should be identity element
-  ecc_25519_scalarmult(&work, &ecc_25519_gf_order, pubkey);
-
-  // FIXME: Check whether pubkey lies on curve?
-  //        If the point was unpacked, it is guaranteed to
-  //        lie on the curve.
-  return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
-}
+#include "ecdsa.h"
 
 int main(int argc, char *argv[]) {
   unsigned char signature[64];
