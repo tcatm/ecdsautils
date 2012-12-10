@@ -48,8 +48,8 @@ int main(int argc, char *argv[]) {
   ecc_int_256 pubkey_packed, r, s, hash, tmp, w, u1, u2;
   ecc_25519_work pubkey, work, s1, s2;
 
-  if (argc != 4)
-    error(1, 0, "Usage: %s hash signature pubkey", argv[0]);
+  if (argc < 4)
+    error(1, 0, "Usage: %s hash signature pubkey1 [pubkey2 ...]", argv[0]);
 
   if (!parsehex(tmp.p, argv[1], 32))
     error(1, 0, "Error while reading hash");
@@ -57,37 +57,45 @@ int main(int argc, char *argv[]) {
   if (!parsehex(signature, argv[2], 64))
     error(1, 0, "Error while reading signature");
 
-  if (!parsehex(pubkey_packed.p, argv[3], 32))
-    error(1, 0, "Error while reading pubkey");
-
   memcpy(r.p, signature, 32);
   memcpy(s.p, signature+32, 32);
 
   // Reduce hash (instead of clearing 3 bits)
   ecc_25519_gf_reduce(&hash, &tmp);
 
-  ecc_25519_load_packed(&pubkey, &pubkey_packed);
-
-  if (!is_valid_pubkey(&pubkey))
-    error(1, 0, "Invalid pubkey");
-
   ecc_25519_gf_recip(&w, &s);
   ecc_25519_gf_mult(&u1, &hash, &w);
   ecc_25519_gf_mult(&u2, &r, &w);
 
   ecc_25519_scalarmult_base(&s1, &u1);
-  ecc_25519_scalarmult(&s2, &u2, &pubkey);
 
-  ecc_25519_add(&work, &s1, &s2);
+  for (int i = 3; i < argc; i++) {
+    char *pubkey_string = argv[i];
 
-  ecc_25519_store_xy(&w, NULL, &work);
+    if (!parsehex(pubkey_packed.p, pubkey_string, 32)) {
+      fprintf(stderr, "Error while reading pubkey %s\n", pubkey_string);
+      continue;
+    }
 
-  ecc_25519_gf_sub(&tmp, &r, &w);
+    ecc_25519_load_packed(&pubkey, &pubkey_packed);
 
-  if (!ecc_25519_gf_is_zero(&tmp))
-    error(1, 0, "Invalid signature");
+    if (!is_valid_pubkey(&pubkey)) {
+      fprintf(stderr, "Invalid pubkey %s\n", pubkey_string);
+      continue;
+    }
 
-  puts("Signature is valid");
+    ecc_25519_scalarmult(&s2, &u2, &pubkey);
+    ecc_25519_add(&work, &s1, &s2);
+    ecc_25519_store_xy(&w, NULL, &work);
+    ecc_25519_gf_sub(&tmp, &r, &w);
 
-  return 0;
+    if (ecc_25519_gf_is_zero(&tmp)) {
+      printf("Signature verified by %s\n", pubkey_string);
+      exit(0);
+    }
+  }
+
+  fprintf(stderr, "None of the supplied public keys could be used to verify the signature\n");
+
+  return 1;
 }
