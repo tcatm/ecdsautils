@@ -47,8 +47,7 @@ int main(int argc, char *argv[]) {
   if (!parsehex(signature, argv[2], 64))
     error(1, 0, "Error while reading signature");
 
-  memcpy(r.p, signature, 32);
-  memcpy(s.p, signature+32, 32);
+  ecdsa_split_signature(&r, &s, signature);
 
   // Reduce hash (instead of clearing 3 bits)
   ecc_25519_gf_reduce(&hash, &tmp);

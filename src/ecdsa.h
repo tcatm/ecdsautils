@@ -31,3 +31,5 @@ int ecdsa_new_secret(ecc_int_256 *secret);
 void ecdsa_public_from_secret(ecc_int_256 *pub, ecc_int_256 *secret);
 
 int is_valid_pubkey(ecc_25519_work *pubkey);
+
+void ecdsa_split_signature(ecc_int_256 *r, ecc_int_256 *s, unsigned char *signature);

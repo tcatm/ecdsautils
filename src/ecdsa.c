@@ -23,6 +23,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <string.h>
 #include <libuecc/ecc.h>
 
 #include "random.h"
@@ -53,3 +54,9 @@ int is_valid_pubkey(ecc_25519_work *pubkey) {
   //        lie on the curve.
   return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
 }
+
+void ecdsa_split_signature(ecc_int_256 *r, ecc_int_256 *s, unsigned char *signature) {
+  memcpy(r->p, signature, 32);
+  memcpy(s->p, signature+32, 32);
+}
+
