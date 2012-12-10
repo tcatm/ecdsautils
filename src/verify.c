@@ -57,14 +57,14 @@ int main(int argc, char *argv[]) {
   if (!parsehex(signature, argv[2], 64))
     error(1, 0, "Error while reading signature");
 
-  if (!parsehex(hash.p, argv[3], 32))
+  if (!parsehex(tmp.p, argv[3], 32))
     error(1, 0, "Error while reading hash");
 
   memcpy(r.p, signature, 32);
   memcpy(s.p, signature+32, 32);
 
-  // hash must have only 253 significant bits!
-  hash.p[31] &= 0x1f;
+  // Reduce hash (instead of clearing 3 bits)
+  ecc_25519_gf_reduce(&hash, &tmp);
 
   ecc_25519_load_packed(&pubkey, &pubkey_packed);
 
