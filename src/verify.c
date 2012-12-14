@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (optind >= argc) {
-    fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] file", argv[0]);
+    fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] [-n num] file", argv[0]);
     goto error_out;
   }
 
