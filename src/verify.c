@@ -27,52 +27,108 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <getopt.h>
+#include <assert.h>
 #include <libuecc/ecc.h>
 
 #include "hexutil.h"
 #include "sha256_file.h"
 #include "ecdsa.h"
+#include "array.h"
 
 int main(int argc, char *argv[]) {
   unsigned char signature[64];
-  ecdsa_verify_context ctx;
-  ecc_int_256 pubkey_packed, tmp;
-  ecc_25519_work pubkey;
 
-  if (argc < 4)
-    error(1, 0, "Usage: %s file signature pubkey1 [pubkey2 ...]", argv[0]);
+  array pubkeys, signatures;
+  array_init(&pubkeys, sizeof(ecc_25519_work), 5);
+  array_init(&signatures, sizeof(signature), 5);
 
-  if (!sha256_file(argv[1], tmp.p))
-    error(1, 0, "Error while hashing file");
+  int min_good_signatures = 1;
 
-  if (!parsehex(signature, argv[2], 64))
-    error(1, 0, "Error while reading signature");
+  int opt;
+  while ((opt = getopt(argc, argv, "s:p:n:")) != -1) {
+    ecc_int_256 pubkey_packed;
+    ecc_25519_work pubkey;
 
+    switch (opt) {
+      case 's':
+        if (!parsehex(signature, optarg, 64)) {
+          fprintf(stderr, "Error while reading signature %s", optarg);
+          break;
+        }
 
-  ecdsa_verify_prepare(&ctx, &tmp, signature);
+        if (!array_add(&signatures, signature, sizeof(signature))) {
+          fprintf(stderr, "Error in array_add\n");
+          goto error_out;
+        }
+        break;
+      case 'p':
+        if (!parsehex(pubkey_packed.p, optarg, 32)) {
+          fprintf(stderr, "Error while reading pubkey %s\n", optarg);
+          break;
+        }
 
-  for (int i = 3; i < argc; i++) {
-    char *pubkey_string = argv[i];
+        ecc_25519_load_packed(&pubkey, &pubkey_packed);
 
-    if (!parsehex(pubkey_packed.p, pubkey_string, 32)) {
-      fprintf(stderr, "Error while reading pubkey %s\n", pubkey_string);
-      continue;
-    }
+        if (!ecdsa_is_valid_pubkey(&pubkey)) {
+          fprintf(stderr, "Invalid pubkey %s\n", optarg);
+          break;
+        }
 
-    ecc_25519_load_packed(&pubkey, &pubkey_packed);
-
-    if (!ecdsa_is_valid_pubkey(&pubkey)) {
-      fprintf(stderr, "Invalid pubkey %s\n", pubkey_string);
-      continue;
-    }
-
-    if (ecdsa_verify_with_pubkey(&ctx, &pubkey)) {
-      printf("Signature verified by %s\n", pubkey_string);
-      exit(0);
+        if (!array_add(&pubkeys, &pubkey, sizeof(ecc_25519_work))) {
+          fprintf(stderr, "Error in array_add\n");
+          goto error_out;
+        }
+        break;
+      case 'n':
+        min_good_signatures = atoi(optarg);
     }
   }
 
-  fprintf(stderr, "None of the supplied public keys could be used to verify the signature\n");
+  if (optind >= argc) {
+    fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] file", argv[0]);
+    goto error_out;
+  }
 
+  ecc_int_256 hash;
+
+  if (!sha256_file(argv[optind], hash.p)) {
+    fprintf(stderr, "Error while hashing file");
+    goto error_out;
+  }
+
+  int good_signatures = 0;
+
+  array_nub(&pubkeys);
+  array_nub(&signatures);
+
+  for (int i = 0; i < signatures.size; i++) {
+    unsigned char *signature;
+    ecdsa_verify_context ctx;
+
+    signature = ARRAY_INDEX(signatures, i);
+
+    ecdsa_verify_prepare(&ctx, &hash, signature);
+
+    for (int i = 0; i < pubkeys.size; i++) {
+      ecc_25519_work *pubkey;
+      pubkey = ARRAY_INDEX(pubkeys, i);
+
+      if (ecdsa_verify_with_pubkey(&ctx, pubkey))
+        good_signatures++;
+    }
+  }
+
+  array_destroy(&pubkeys);
+  array_destroy(&signatures);
+
+  if (good_signatures >= min_good_signatures)
+    return 0;
+
+  return 1;
+
+error_out:
+  array_destroy(&pubkeys);
+  array_destroy(&signatures);
   return 1;
 }
