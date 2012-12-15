@@ -11,9 +11,9 @@ PKG_NAME:=ecdsautils
 PKG_VERSION:=0.1
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=
-PKG_MD5SUM:=e13740acf53b765e680149ecfdfca25a
+PKG_SOURCE:=v$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://github.com/tcatm/ecdsautils/archive/
+PKG_MD5SUM:=5e7a2fa66729a9bd87be339024d6d57e
 
 PKG_BUILD_DEPENDS:=libuecc
 
@@ -24,7 +24,7 @@ define Package/ecdsautils
   SECTION:=utils
   CATEGORY:=Utilities
   DEPENDS:=
-  TITLE:=Sign checksums and verify ECDSA signatures. 
+  TITLE:=ECDSA Utilities
   URL:=https://github.com/tcatm/ecdsautils
 endef
 
