@@ -41,3 +41,4 @@ int array_resize(array *array, int n);
 int array_add(array *array, void *el, size_t len);
 void array_sort(array *array);
 void array_nub(array *array);
+void array_rm(array *array, int i);

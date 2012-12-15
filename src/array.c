@@ -115,3 +115,17 @@ void array_nub(array *array) {
     }
   }
 }
+
+void array_rm(array *array, int i) {
+  assert(array != NULL);
+
+  if (i >= array->size)
+    return;
+
+  array->size--;
+
+  void *e = array_index(array, i);
+  if (i != array->size) {
+    memmove(e, e + array->el_size, array->el_size * (array->size - i));
+  }
+}

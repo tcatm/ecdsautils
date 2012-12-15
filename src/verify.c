@@ -114,8 +114,11 @@ int main(int argc, char *argv[]) {
       ecc_25519_work *pubkey;
       pubkey = ARRAY_INDEX(pubkeys, i);
 
-      if (ecdsa_verify_with_pubkey(&ctx, pubkey))
+      if (ecdsa_verify_with_pubkey(&ctx, pubkey)) {
         good_signatures++;
+        array_rm(&pubkeys, i);
+        break;
+      }
     }
   }
 
