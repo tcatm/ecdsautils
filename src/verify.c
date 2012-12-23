@@ -40,15 +40,15 @@ int main(int argc, char *argv[]) {
   unsigned char signature[64];
 
   array pubkeys, signatures;
-  array_init(&pubkeys, sizeof(ecc_25519_work), 5);
+  array_init(&pubkeys, sizeof(ecc_25519_work_t), 5);
   array_init(&signatures, sizeof(signature), 5);
 
   int min_good_signatures = 1;
 
   int opt;
   while ((opt = getopt(argc, argv, "s:p:n:")) != -1) {
-    ecc_int_256 pubkey_packed;
-    ecc_25519_work pubkey;
+    ecc_int256_t pubkey_packed;
+    ecc_25519_work_t pubkey;
 
     switch (opt) {
       case 's':
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
           break;
         }
 
-        if (!array_add(&pubkeys, &pubkey, sizeof(ecc_25519_work))) {
+        if (!array_add(&pubkeys, &pubkey, sizeof(ecc_25519_work_t))) {
           fprintf(stderr, "Error in array_add\n");
           goto error_out;
         }
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
     goto error_out;
   }
 
-  ecc_int_256 hash;
+  ecc_int256_t hash;
 
   if (!sha256_file(argv[optind], hash.p)) {
     fprintf(stderr, "Error while hashing file");
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     ecdsa_verify_prepare(&ctx, &hash, signature);
 
     for (int i = 0; i < pubkeys.size; i++) {
-      ecc_25519_work *pubkey;
+      ecc_25519_work_t *pubkey;
       pubkey = ARRAY_INDEX(pubkeys, i);
 
       if (ecdsa_verify_with_pubkey(&ctx, pubkey)) {

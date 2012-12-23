@@ -33,13 +33,13 @@
 #include "hexutil.h"
 #include "ecdsa.h"
 
-void output_key(ecc_int_256 *key) {
+void output_key(ecc_int256_t *key) {
   hexdump(stdout, key->p, 32); puts("");
 }
 
 void show_pubkey() {
   char secret_string[65];
-  ecc_int_256 pubkey, secret;
+  ecc_int256_t pubkey, secret;
 
   if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
     goto secret_error;
@@ -58,7 +58,7 @@ secret_error:
 }
 
 void new_secret() {
-  ecc_int_256 secret;
+  ecc_int256_t secret;
 
   if (!ecdsa_new_secret(&secret))
     error(1, 0, "Unable to read random bytes");

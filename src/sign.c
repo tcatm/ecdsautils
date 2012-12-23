@@ -32,8 +32,8 @@
 #include "sha256_file.h"
 
 int main(int argc, char *argv[]) {
-  ecc_int_256 secret, hash, k, krecip, r, s, tmp;
-  ecc_25519_work kG;
+  ecc_int256_t secret, hash, k, krecip, r, s, tmp;
+  ecc_25519_work_t kG;
 
   if (argc != 2)
     error(1, 0, "Usage: %s file (secret is read from stdin)", argv[0]);

@@ -29,7 +29,7 @@
 #include "random.h"
 #include "ecdsa.h"
 
-int ecdsa_new_secret(ecc_int_256 *secret) {
+int ecdsa_new_secret(ecc_int256_t *secret) {
   if (!random_bytes(secret->p, 32))
     return 0;
 
@@ -38,14 +38,14 @@ int ecdsa_new_secret(ecc_int_256 *secret) {
   return 1;
 }
 
-void ecdsa_public_from_secret(ecc_int_256 *pub, ecc_int_256 *secret) {
-  ecc_25519_work work;
+void ecdsa_public_from_secret(ecc_int256_t *pub, ecc_int256_t *secret) {
+  ecc_25519_work_t work;
   ecc_25519_scalarmult_base(&work, secret);
   ecc_25519_store_packed(pub, &work);
 }
 
-int ecdsa_is_valid_pubkey(ecc_25519_work *pubkey) {
-  ecc_25519_work work;
+int ecdsa_is_valid_pubkey(ecc_25519_work_t *pubkey) {
+  ecc_25519_work_t work;
 
   // q * pubkey should be identity element
   ecc_25519_scalarmult(&work, &ecc_25519_gf_order, pubkey);
@@ -56,13 +56,13 @@ int ecdsa_is_valid_pubkey(ecc_25519_work *pubkey) {
   return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
 }
 
-void ecdsa_split_signature(ecc_int_256 *r, ecc_int_256 *s, unsigned char *signature) {
+void ecdsa_split_signature(ecc_int256_t *r, ecc_int256_t *s, unsigned char *signature) {
   memcpy(r->p, signature, 32);
   memcpy(s->p, signature+32, 32);
 }
 
-void ecdsa_verify_prepare(ecdsa_verify_context *ctx, ecc_int_256 *hash, unsigned char *signature) {
-  ecc_int_256 tmp, w, u1;
+void ecdsa_verify_prepare(ecdsa_verify_context *ctx, ecc_int256_t *hash, unsigned char *signature) {
+  ecc_int256_t tmp, w, u1;
 
   ecdsa_split_signature(&ctx->r, &tmp, signature);
   ecc_25519_gf_recip(&w, &tmp);
@@ -75,9 +75,9 @@ void ecdsa_verify_prepare(ecdsa_verify_context *ctx, ecc_int_256 *hash, unsigned
   ecc_25519_scalarmult_base(&ctx->s1, &u1);
 }
 
-int ecdsa_verify_with_pubkey(ecdsa_verify_context *ctx, ecc_25519_work *pubkey) {
-  ecc_25519_work s2, work;
-  ecc_int_256 w, tmp;
+int ecdsa_verify_with_pubkey(ecdsa_verify_context *ctx, ecc_25519_work_t *pubkey) {
+  ecc_25519_work_t s2, work;
+  ecc_int256_t w, tmp;
 
   ecc_25519_scalarmult(&s2, &ctx->u2, pubkey);
   ecc_25519_add(&work, &ctx->s1, &s2);
