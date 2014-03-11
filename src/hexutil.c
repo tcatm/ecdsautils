@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int parsehex(void *buffer, char *string, size_t len) {
+int parsehex(void *buffer, const char *string, size_t len) {
   // number of digits must be even
   if ((strlen(string) & 1) == 1)
     return 0;

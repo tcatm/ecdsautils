@@ -38,13 +38,13 @@ int ecdsa_new_secret(ecc_int256_t *secret) {
   return 1;
 }
 
-void ecdsa_public_from_secret(ecc_int256_t *pub, ecc_int256_t *secret) {
+void ecdsa_public_from_secret(ecc_int256_t *pub, const ecc_int256_t *secret) {
   ecc_25519_work_t work;
   ecc_25519_scalarmult_base(&work, secret);
   ecc_25519_store_packed(pub, &work);
 }
 
-int ecdsa_is_valid_pubkey(ecc_25519_work_t *pubkey) {
+int ecdsa_is_valid_pubkey(const ecc_25519_work_t *pubkey) {
   ecc_25519_work_t work;
 
   // q * pubkey should be identity element
@@ -56,12 +56,12 @@ int ecdsa_is_valid_pubkey(ecc_25519_work_t *pubkey) {
   return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
 }
 
-void ecdsa_split_signature(ecc_int256_t *r, ecc_int256_t *s, unsigned char *signature) {
+void ecdsa_split_signature(ecc_int256_t *r, ecc_int256_t *s, const unsigned char *signature) {
   memcpy(r->p, signature, 32);
   memcpy(s->p, signature+32, 32);
 }
 
-void ecdsa_verify_prepare(ecdsa_verify_context *ctx, ecc_int256_t *hash, unsigned char *signature) {
+void ecdsa_verify_prepare(ecdsa_verify_context *ctx, const ecc_int256_t *hash, const unsigned char *signature) {
   ecc_int256_t tmp, w, u1;
 
   ecdsa_split_signature(&ctx->r, &tmp, signature);
@@ -75,7 +75,7 @@ void ecdsa_verify_prepare(ecdsa_verify_context *ctx, ecc_int256_t *hash, unsigne
   ecc_25519_scalarmult_base(&ctx->s1, &u1);
 }
 
-int ecdsa_verify_with_pubkey(ecdsa_verify_context *ctx, ecc_25519_work_t *pubkey) {
+int ecdsa_verify_with_pubkey(const ecdsa_verify_context *ctx, const ecc_25519_work_t *pubkey) {
   ecc_25519_work_t s2, work;
   ecc_int256_t w, tmp;
 

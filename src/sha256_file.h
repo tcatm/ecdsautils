@@ -23,4 +23,4 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-int sha256_file(char *fname, unsigned char *hash);
+int sha256_file(const char *fname, unsigned char *hash);

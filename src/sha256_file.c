@@ -33,7 +33,7 @@
 
 #define BLOCKSIZE 64
 
-int sha256_file(char *fname, unsigned char *hash) {
+int sha256_file(const char *fname, unsigned char *hash) {
   int fd;
 
   fd = open(fname, O_RDONLY);

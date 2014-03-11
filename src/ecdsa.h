@@ -34,12 +34,12 @@ typedef struct _ecdsa_verify_context {
  */
 int ecdsa_new_secret(ecc_int256_t *secret);
 
-void ecdsa_public_from_secret(ecc_int256_t *pub, ecc_int256_t *secret);
+void ecdsa_public_from_secret(ecc_int256_t *pub, const ecc_int256_t *secret);
 
-int ecdsa_is_valid_pubkey(ecc_25519_work_t *pubkey);
+int ecdsa_is_valid_pubkey(const ecc_25519_work_t *pubkey);
 
-void ecdsa_split_signature(ecc_int256_t *r, ecc_int256_t *s, unsigned char *signature);
+void ecdsa_split_signature(ecc_int256_t *r, ecc_int256_t *s, const unsigned char *signature);
 
-void ecdsa_verify_prepare(ecdsa_verify_context *ctx, ecc_int256_t *hash, unsigned char *signature);
+void ecdsa_verify_prepare(ecdsa_verify_context *ctx, const ecc_int256_t *hash, const unsigned char *signature);
 
-int ecdsa_verify_with_pubkey(ecdsa_verify_context *ctx, ecc_25519_work_t *pubkey);
+int ecdsa_verify_with_pubkey(const ecdsa_verify_context *ctx, const ecc_25519_work_t *pubkey);
