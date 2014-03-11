@@ -49,19 +49,22 @@ int sha256_file(char *fname, unsigned char *hash) {
 
   SHA256Init(&ctx);
 
-  do {
+  while (1) {
     ret = read(fd, buffer, BLOCKSIZE);
 
     if (ret < 0) {
       if (errno == EINTR)
         continue;
 
-       fprintf(stderr, "Unable to read file: %s\n", strerror(errno));
-       goto out_error;
+      fprintf(stderr, "Unable to read file: %s\n", strerror(errno));
+      goto out_error;
     }
 
+    if (ret == 0)
+      break;
+
     SHA256Update(&ctx, buffer, ret);
-  } while (ret == BLOCKSIZE);
+  }
 
   SHA256Final(&ctx, hash);
 
