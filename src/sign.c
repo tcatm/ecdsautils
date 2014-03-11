@@ -25,11 +25,28 @@
 
 #include <error.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
 #include <libuecc/ecc.h>
 
 #include "hexutil.h"
 #include "ecdsa.h"
+#include "hmac_sha256.h"
 #include "sha256_file.h"
+
+/**
+ * Performs the first expansion step of HKDF-SHA256 (RFC 5869)
+ * (the extraction step is skipped as the secret key is already
+ * a uniformly random string, with the exception of the five bits
+ * ecc_25519_gf_sanitize_secret sets and clears)
+ */
+static void generate_k(uint8_t *k, const uint8_t prk[32], const uint8_t info[32]) {
+  uint8_t input[33];
+  memcpy(input, info, 32);
+  input[32] = 0x01;
+
+  hmac_sha256(k, prk, input, sizeof(input));
+}
 
 int main(int argc, char *argv[]) {
   ecc_int256_t secret, hash, k, krecip, r, s, tmp;
@@ -52,41 +69,37 @@ int main(int argc, char *argv[]) {
   // Reduce hash (instead of clearing 3 bits)
   ecc_25519_gf_reduce(&hash, &tmp);
 
-  while (1) {
-    // genarate random k
-    if (!ecdsa_new_secret(&k))
-      error(1, 0, "Unable to read random bytes");
+  // Generate k
+  generate_k(k.p, secret.p, tmp.p);
+  ecc_25519_gf_sanitize_secret(&k, &k);
 
-    // calculate k^(-1)
-    ecc_25519_gf_recip(&krecip, &k);
+  // calculate k^(-1)
+  ecc_25519_gf_recip(&krecip, &k);
 
-    // calculate kG = k * base point
-    ecc_25519_scalarmult_base(&kG, &k);
+  // calculate kG = k * base point
+  ecc_25519_scalarmult_base(&kG, &k);
 
-    // store x coordinate of kG in r
-    ecc_25519_store_xy(&tmp, NULL, &kG);
-    ecc_25519_gf_reduce(&r, &tmp);
+  // store x coordinate of kG in r
+  ecc_25519_store_xy(&tmp, NULL, &kG);
+  ecc_25519_gf_reduce(&r, &tmp);
 
-    if (ecc_25519_gf_is_zero(&r))
-      continue;
+  if (ecc_25519_gf_is_zero(&r))
+    error(1, 0, "Error: r is zero (this should never happen)");
 
-    // tmp = r * secret
-    ecc_25519_gf_mult(&tmp, &r, &secret);
+  // tmp = r * secret
+  ecc_25519_gf_mult(&tmp, &r, &secret);
 
-    // s = hash + tmp = hash + r * secret
-    ecc_25519_gf_add(&s, &hash, &tmp);
+  // s = hash + tmp = hash + r * secret
+  ecc_25519_gf_add(&s, &hash, &tmp);
 
-    // tmp = krecip * s = k^(-1) * s
-    ecc_25519_gf_mult(&tmp, &krecip, &s);
+  // tmp = krecip * s = k^(-1) * s
+  ecc_25519_gf_mult(&tmp, &krecip, &s);
 
-    // mod n (order of G)
-    ecc_25519_gf_reduce(&s, &tmp);
+  // mod n (order of G)
+  ecc_25519_gf_reduce(&s, &tmp);
 
-    if (ecc_25519_gf_is_zero(&s))
-      continue;
-
-    break;
-  }
+  if (ecc_25519_gf_is_zero(&s))
+    error(1, 0, "Error: s is zero (this should never happen)");
 
   hexdump(stdout, r.p, 32);
   hexdump(stdout, s.p, 32);
