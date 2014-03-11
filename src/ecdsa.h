@@ -22,6 +22,9 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#pragma once
+
+#include <libuecc/ecc.h>
 
 typedef struct _ecdsa_verify_context {
    ecc_25519_work_t s1;

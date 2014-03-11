@@ -22,9 +22,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
 */
-
-#ifndef __ULIB_SHA256_H
-#define __ULIB_SHA256_H
+#pragma once
 
 #include <inttypes.h>
 
@@ -55,5 +53,3 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-#endif  /* __ULIB_SHA256_H */
