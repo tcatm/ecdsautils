@@ -23,79 +23,12 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <error.h>
+#define _GNU_SOURCE
+
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-#include <libuecc/ecc.h>
 
 #include "version.h"
-#include "hexutil.h"
-#include "ecdsa.h"
 
-void output_key(ecc_int256_t *key) {
-  hexdump(stdout, key->p, 32); puts("");
-}
-
-void show_pubkey() {
-  char secret_string[65];
-  ecc_int256_t pubkey, secret;
-
-  if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
-    goto secret_error;
-
-  if (!parsehex(secret.p, secret_string, 32))
-    goto secret_error;
-
-  ecdsa_public_from_secret(&pubkey, &secret);
-
-  output_key(&pubkey);
-  return;
-
-secret_error:
-  error(1, 0, "Error reading secret");
-  return;
-}
-
-void new_secret() {
-  ecc_int256_t secret;
-
-  if (!ecdsa_new_secret(&secret))
-    error(1, 0, "Unable to read random bytes");
-
-  output_key(&secret);
-}
-
-void usage(char *cmdname) {
-  printf("Usage: %s [-s] [-p] [-h]\n", cmdname);
-}
-
-void help(char *cmdname) {
-  print_version();
-  usage(cmdname);
-  puts("\t-s\tgenerate a new secret on stdout");
-  puts("\t-p\toutput public key of secret read from stdin");
-  puts("\t-h\tdisplay this short help and exit");
-}
-
-int main(int argc, char **argv) {
-  char c;
-
-  while ((c = getopt(argc, argv, "sph")) != -1) {
-    switch (c) {
-      case 's':
-        new_secret();
-        return 0;
-      case 'p':
-        show_pubkey();
-        return 0;
-      case 'h':
-        help(argv[0]);
-        return 0;
-    }
-  }
-
-  usage(argv[0]);
-  return 1;
+void print_version() {
+  puts("ecdsautils " VERSION "\n");
 }
