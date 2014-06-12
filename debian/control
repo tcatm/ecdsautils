@@ -1,0 +1,15 @@
+Source: ecdsautils
+Section: utils
+Priority: extra
+Maintainer: Steffen Moeller <moeller@debian.org>
+Build-Depends: debhelper (>= 8.0.0), cmake
+Standards-Version: 3.9.5
+Homepage: https://github.com/tcatm/ecdsautils
+#Vcs-Git: git://git.debian.org/collab-maint/ecdsautils.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/ecdsautils.git;a=summary
+
+Package: ecdsautils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: ECDSA keygen, sign, verifification
+ Freifunk rules!
