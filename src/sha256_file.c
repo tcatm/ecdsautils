@@ -36,7 +36,10 @@
 int sha256_file(const char *fname, unsigned char *hash) {
   int fd;
 
-  fd = open(fname, O_RDONLY);
+  if (fname)
+    fd = open(fname, O_RDONLY);
+  else
+    fd = STDIN_FILENO;
 
   if (fd < 0) {
     fprintf(stderr, "Can't open file: %s\n", strerror(errno));

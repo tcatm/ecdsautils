@@ -87,14 +87,14 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (optind >= argc) {
+  if (optind > argc) {
     fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] [-n num] file\n", argv[0]);
     goto error_out;
   }
 
   ecc_int256_t hash;
 
-  if (!sha256_file(argv[optind], hash.p)) {
+  if (!sha256_file((optind <= argc) ? argv[optind] : NULL, hash.p)) {
     fprintf(stderr, "Error while hashing file\n");
     goto error_out;
   }
