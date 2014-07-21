@@ -5,6 +5,5 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(UECC REQUIRED libuecc>=3)
 
 set(CMAKE_MODULE_PATH ${ECDSAUTIL_SOURCE_DIR})
-set(CMAKE_C_FLAGS "-std=c99 -Wall")
 
 add_subdirectory(src)
