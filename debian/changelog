@@ -1,4 +1,10 @@
-ecdsautils (0.3.1+git20140612-1) unstable; urgency=low
+ecdsautils (0.3.2-1) unstable; urgency=low
+
+  * ecdsaverify will read from stdin if no file is given
+
+ -- Nils Schneider <nils@nilsschneider.net>  Mon, 21 Jul 2014 14:30:00 +0200
+
+ecdsautils (0.3.1-1) unstable; urgency=low
 
   * Initial release (Closes: #nnnn).
 
