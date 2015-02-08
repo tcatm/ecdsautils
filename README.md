@@ -81,3 +81,10 @@ Signature Format
 
 concat $ map tohexstring [r, s]
 
+
+Release precedure
+-----------------
+
+- [ ] update debian/changelog
+- [ ] create debian package
+- [ ] update AUR package
