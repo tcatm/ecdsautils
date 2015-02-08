@@ -23,7 +23,6 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <error.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +32,7 @@
 #include "version.h"
 #include "hexutil.h"
 #include "ecdsa.h"
+#include "error.h"
 
 void output_key(ecc_int256_t *key) {
   hexdump(stdout, key->p, 32); puts("");
@@ -54,7 +54,7 @@ void show_pubkey() {
   return;
 
 secret_error:
-  error(1, 0, "Error reading secret");
+  exit_error(1, 0, "Error reading secret");
   return;
 }
 
@@ -62,7 +62,7 @@ void new_secret() {
   ecc_int256_t secret;
 
   if (!ecdsa_new_secret(&secret))
-    error(1, 0, "Unable to read random bytes");
+    exit_error(1, 0, "Unable to read random bytes");
 
   output_key(&secret);
 }

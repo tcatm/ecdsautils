@@ -23,12 +23,12 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <error.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <libuecc/ecc.h>
 
+#include "error.h"
 #include "hexutil.h"
 #include "ecdsa.h"
 #include "hmac_sha256.h"
@@ -53,18 +53,18 @@ int main(int argc, char *argv[]) {
   ecc_25519_work_t kG;
 
   if (argc != 2)
-    error(1, 0, "Usage: %s file (secret is read from stdin)", argv[0]);
+    exit_error(1, 0, "Usage: %s file (secret is read from stdin)", argv[0]);
 
   if (!sha256_file(argv[1], tmp.p))
-    error(1, 0, "Error while hashing file");
+    exit_error(1, 0, "Error while hashing file");
 
   char secret_string[65];
 
   if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
-    error(1, 0, "Error reading secret");
+    exit_error(1, 0, "Error reading secret");
 
   if (!parsehex(secret.p, secret_string, 32))
-    error(1, 0, "Error reading secret");
+    exit_error(1, 0, "Error reading secret");
 
   // Reduce hash (instead of clearing 3 bits)
   ecc_25519_gf_reduce(&hash, &tmp);
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   ecc_25519_gf_reduce(&r, &tmp);
 
   if (ecc_25519_gf_is_zero(&r))
-    error(1, 0, "Error: r is zero (this should never happen)");
+    exit_error(1, 0, "Error: r is zero (this should never happen)");
 
   // tmp = r * secret
   ecc_25519_gf_mult(&tmp, &r, &secret);
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   ecc_25519_gf_reduce(&s, &tmp);
 
   if (ecc_25519_gf_is_zero(&s))
-    error(1, 0, "Error: s is zero (this should never happen)");
+    exit_error(1, 0, "Error: s is zero (this should never happen)");
 
   hexdump(stdout, r.p, 32);
   hexdump(stdout, s.p, 32);
