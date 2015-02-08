@@ -80,8 +80,10 @@ int array_add(array *array, void *el, size_t len) {
   return 1;
 }
 
+#if defined(LINUX_QSORT_R)
+
 static int cmparray(const void *p1, const void *p2, void *size) {
-  return memcmp((void const*)p1, (void const*)p2, *(size_t*)size);
+  return memcmp(p1, p2, *(size_t*)size);
 }
 
 void array_sort(array *array) {
@@ -89,6 +91,24 @@ void array_sort(array *array) {
 
   qsort_r(array->content, array->size, array->el_size, cmparray, &array->el_size);
 }
+
+#elif defined(BSD_QSORT_R)
+
+static int cmparray(void *size, const void *p1, const void *p2) {
+  return memcmp(p1, p2, *(size_t*)size);
+}
+
+void array_sort(array *array) {
+  assert(array != NULL);
+
+  qsort_r(array->content, array->size, array->el_size, &array->el_size, cmparray);
+}
+
+#else
+
+#error Unknown qsort_r definition
+
+#endif
 
 void array_nub(array *array) {
   assert(array != NULL);
