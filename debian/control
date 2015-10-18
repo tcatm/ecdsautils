@@ -3,13 +3,21 @@ Section: utils
 Priority: extra
 Maintainer: Steffen Moeller <moeller@debian.org>
 Build-Depends: debhelper (>= 8.0.0), cmake, libuecc-dev
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Homepage: https://github.com/tcatm/ecdsautils
-#Vcs-Git: git://git.debian.org/collab-maint/ecdsautils.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/ecdsautils.git;a=summary
+Vcs-Git: https://github.com/tcatm/ecdsautils.git
+Vcs-Browser: https://github.com/tcatm/ecdsautils
 
 Package: ecdsautils
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: ECDSA keygen, sign, verifification
- Freifunk rules!
+Description: ECDSA elliptic curve cryptography command line tools
+ The package provides a series of tools to support, all
+ on the basis of the uecc library the
+  * generation
+  * signing
+  * verifification
+ of keys for elliptic key cryptography.
+ -
+ The package became popular in the Freifunk Wireless
+ networks communities.
