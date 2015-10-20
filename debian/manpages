@@ -1,1 +1,3 @@
 debian/ecdsakeygen.1
+debian/ecdsasign.1
+debian/ecdsaverify.1
