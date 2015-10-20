@@ -1,0 +1,21 @@
+.TH ECDSASIGN "1" "June 2014" "ECDSA Utils" "User Commands"
+.SH NAME
+ecdsasign \- ECDSA document signing
+.SH SYNOPSIS
+.B ecdsasign document.txt < filewithsecret
+[\fI\,-s\/\fR] [\fI\,-p\/\fR] [\fI\,-h\/\fR]
+.SH DESCRIPTION
+ecdsautils reads the secret from stdin
+and signs a single document passed as an argument.
+The document is changed in that the signature
+is added at the bottom of the file, separated
+by a dashed line. Multiple individuals can
+sign a single document.
+display this short help and exit
+.SH "SEE ALSO"
+The full documentation for
+.B ecdsakeygen
+is in the source at
+https://github.com/tcatm/ecdsautils
+.SH AUTHOR
+Nils Schneider
