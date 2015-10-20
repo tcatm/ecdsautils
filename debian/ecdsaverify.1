@@ -1,0 +1,25 @@
+.TH ECDSAVERIFY "1" "June 2014" "ECDSA Utils" "User Commands"
+.SH NAME
+ecdsaverify \- ECDSA verification
+.SH SYNOPSIS
+.B ecdsaverify
+[\fI\,-s\/\fR signature] [\fI\,-p\/\fR pubkey] [\fI\,-n\/\fR num]
+file
+.SH DESCRIPTION
+ecdsaverify takes a file that was signed and decides if that signatures
+was possibly created with a particular public key. The signature may
+be provided at the bottom of the file already or it is passed via the
+-s attribute. 
+.TP
+\fB\-s\fR
+signature, particularly useful for binary files to pass separately
+.TP
+\fB\-p\fR
+public key
+.SH "SEE ALSO"
+The full documentation for
+.B ecdsakeygen
+is in the source at
+https://github.com/tcatm/ecdsautils
+.SH AUTHOR
+Nils Schneider
