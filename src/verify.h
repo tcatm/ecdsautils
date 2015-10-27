@@ -23,46 +23,6 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-#include <libuecc/ecc.h>
+#pragma once
 
-#include "keygen.h"
-#include "version.h"
-#include "hexutil.h"
-#include "ecdsa.h"
-#include "error.h"
-
-void output_key(ecc_int256_t *key) {
-  hexdump(stdout, key->p, 32); puts("");
-}
-
-void show_key(void) {
-  char secret_string[65];
-  ecc_int256_t pubkey, secret;
-
-  if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
-    goto secret_error;
-
-  if (!parsehex(secret.p, secret_string, 32))
-    goto secret_error;
-
-  ecdsa_public_from_secret(&pubkey, &secret);
-
-  output_key(&pubkey);
-  return;
-
-secret_error:
-  exit_error(1, 0, "Error reading secret");
-}
-
-void generate_key(void) {
-  ecc_int256_t secret;
-
-  if (!ecdsa_new_secret(&secret))
-    exit_error(1, 0, "Unable to read random bytes");
-
-  output_key(&secret);
-}
+int verify(int argc, char **argv);
