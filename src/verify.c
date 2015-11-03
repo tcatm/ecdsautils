@@ -24,18 +24,15 @@
 */
 
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <getopt.h>
-#include <assert.h>
-#include <libuecc/ecc.h>
 
-#include "hexutil.h"
-#include "sha256_file.h"
-#include "ecdsa.h"
+#include "verify.h"
 #include "array.h"
+#include "sha256_file.h"
+#include "hexutil.h"
+#include "ecdsa.h"
 
-int main(int argc, char *argv[]) {
+int verify(int argc, char **argv) {
   unsigned char signature[64];
 
   array pubkeys, signatures;
@@ -87,7 +84,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (optind > argc) {
-    fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] [-n num] file\n", argv[0]);
+    fprintf(stderr, "Usage: ecdsautil verify [-s signature ...] [-p pubkey ...] [-n num] file\n");
     goto error_out;
   }
 

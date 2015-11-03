@@ -28,6 +28,7 @@
 #include <string.h>
 #include <libuecc/ecc.h>
 
+#include "sign.h"
 #include "error.h"
 #include "hexutil.h"
 #include "ecdsa.h"
@@ -48,12 +49,12 @@ static void generate_k(uint8_t *k, const uint8_t prk[32], const uint8_t info[32]
   hmac_sha256(k, prk, input, sizeof(input));
 }
 
-int main(int argc, char *argv[]) {
+void sign(int argc, char **argv) {
   ecc_int256_t secret, hash, k, krecip, r, s, tmp;
   ecc_25519_work_t kG;
 
   if (argc != 2)
-    exit_error(1, 0, "Usage: %s file (secret is read from stdin)", argv[0]);
+    exit_error(1, 0, "Usage: ecdsautil sign file (secret is read from stdin)");
 
   if (!sha256_file(argv[1], tmp.p))
     exit_error(1, 0, "Error while hashing file");
@@ -104,6 +105,4 @@ int main(int argc, char *argv[]) {
   hexdump(stdout, r.p, 32);
   hexdump(stdout, s.p, 32);
   puts("");
-
-  return 0;
 }
