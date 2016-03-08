@@ -25,4 +25,4 @@
 
 #pragma once
 
-int verify(int argc, char **argv);
+int verify(const char *command, int argc, char **argv);

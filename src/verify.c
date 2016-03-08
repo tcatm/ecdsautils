@@ -32,7 +32,7 @@
 #include "hexutil.h"
 #include "ecdsa.h"
 
-int verify(int argc, char **argv) {
+int verify(const char *command, int argc, char **argv) {
   unsigned char signature[64];
 
   array pubkeys, signatures;
@@ -84,7 +84,7 @@ int verify(int argc, char **argv) {
   }
 
   if (optind > argc) {
-    fprintf(stderr, "Usage: ecdsautil verify [-s signature ...] [-p pubkey ...] [-n num] file\n");
+    fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] [-n num] file\n", command);
     goto error_out;
   }
 

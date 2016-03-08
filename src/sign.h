@@ -28,4 +28,4 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void sign(int argc, char **argv);
+void sign(const char *command, int argc, char **argv);

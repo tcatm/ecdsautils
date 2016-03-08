@@ -41,3 +41,14 @@ set_target_properties(ecdsautil PROPERTIES COMPILE_FLAGS "-std=c99 -Wall" ${UECC
 target_link_libraries(ecdsautil ${UECC_LIBRARIES})
 
 install(TARGETS ecdsautil RUNTIME DESTINATION bin)
+
+if(CMAKE_HOST_UNIX)
+  install(CODE "
+    EXECUTE_PROCESS(
+      COMMAND ln -sf ecdsautil ecdsakeygen
+      COMMAND ln -sf ecdsautil ecdsasign
+      COMMAND ln -sf ecdsautil ecdsaverify
+      WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin
+    )
+  ")
+endif(CMAKE_HOST_UNIX)

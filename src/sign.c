@@ -49,12 +49,12 @@ static void generate_k(uint8_t *k, const uint8_t prk[32], const uint8_t info[32]
   hmac_sha256(k, prk, input, sizeof(input));
 }
 
-void sign(int argc, char **argv) {
+void sign(const char *command, int argc, char **argv) {
   ecc_int256_t secret, hash, k, krecip, r, s, tmp;
   ecc_25519_work_t kG;
 
   if (argc != 2)
-    exit_error(1, 0, "Usage: ecdsautil sign file (secret is read from stdin)");
+    exit_error(1, 0, "Usage: %s file (secret is read from stdin)", command);
 
   if (!sha256_file(argv[1], tmp.p))
     exit_error(1, 0, "Error while hashing file");
