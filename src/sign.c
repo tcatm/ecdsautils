@@ -78,10 +78,10 @@ void sign(int argc, char **argv) {
   ecc_25519_gf_recip(&krecip, &k);
 
   // calculate kG = k * base point
-  ecc_25519_scalarmult_base(&kG, &k);
+  ecc_25519_scalarmult(&kG, &k, &ecc_25519_work_base_legacy);
 
   // store x coordinate of kG in r
-  ecc_25519_store_xy(&tmp, NULL, &kG);
+  ecc_25519_store_xy_legacy(&tmp, NULL, &kG);
   ecc_25519_gf_reduce(&r, &tmp);
 
   if (ecc_25519_gf_is_zero(&r))

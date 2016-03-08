@@ -66,7 +66,7 @@ int verify(int argc, char **argv) {
 
         int ret;
 
-        ret = ecc_25519_load_packed(&pubkey, &pubkey_packed);
+        ret = ecc_25519_load_packed_legacy(&pubkey, &pubkey_packed);
 
         if (!ret || !ecdsa_is_valid_pubkey(&pubkey)) {
           fprintf(stderr, "Invalid pubkey %s\n", optarg);
