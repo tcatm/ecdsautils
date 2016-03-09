@@ -32,7 +32,7 @@
 #include "hexutil.h"
 #include "ecdsa.h"
 
-int verify(int argc, char **argv) {
+int verify(const char *command, int argc, char **argv) {
   unsigned char signature[64];
 
   array pubkeys, signatures;
@@ -66,7 +66,7 @@ int verify(int argc, char **argv) {
 
         int ret;
 
-        ret = ecc_25519_load_packed(&pubkey, &pubkey_packed);
+        ret = ecc_25519_load_packed_legacy(&pubkey, &pubkey_packed);
 
         if (!ret || !ecdsa_is_valid_pubkey(&pubkey)) {
           fprintf(stderr, "Invalid pubkey %s\n", optarg);
@@ -84,7 +84,7 @@ int verify(int argc, char **argv) {
   }
 
   if (optind > argc) {
-    fprintf(stderr, "Usage: ecdsautil verify [-s signature ...] [-p pubkey ...] [-n num] file\n");
+    fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] [-n num] file\n", command);
     goto error_out;
   }
 

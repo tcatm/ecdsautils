@@ -22,6 +22,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <libgen.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -41,25 +42,33 @@ void help(void) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
-    help();
-    return 1;
+  if (argc >= 2) {
+    if (strcmp(argv[1], "help") == 0) {
+      help();
+      return 0;
+    } else if (strcmp(argv[1], "generate-key") == 0) {
+      generate_key();
+      return 0;
+    } else if (strcmp(argv[1], "show-key") == 0) {
+      show_key();
+      return 0;
+    } else if (strcmp(argv[1], "sign") == 0) {
+      sign("ecdsautil sign", argc - 1, argv + 1);
+      return 0;
+    } else if (strcmp(argv[1], "verify") == 0) {
+      return verify("ecdsautil verify", argc - 1, argv + 1);
+    }
   }
 
-  if (strcmp(argv[1], "help") == 0) {
-    help();
+  const char *command = basename(argv[0]);
+  if (strcmp(command, "ecdsakeygen") == 0) {
+    keygen("ecdsakeygen", argc, argv);
     return 0;
-  } else if (strcmp(argv[1], "generate-key") == 0) {
-    generate_key();
+  } else if (strcmp(command, "ecdsasign") == 0) {
+    sign("ecdsasign", argc, argv);
     return 0;
-  } else if (strcmp(argv[1], "show-key") == 0) {
-    show_key();
-    return 0;
-  } else if (strcmp(argv[1], "sign") == 0) {
-    sign(argc - 1, argv + 1);
-    return 0;
-  } else if (strcmp(argv[1], "verify") == 0) {
-    return verify(argc - 1, argv + 1);
+  } else if (strcmp(command, "ecdsaverify") == 0) {
+    return verify("ecdsaverify", argc, argv);
   } else {
     help();
     return 1;

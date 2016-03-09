@@ -66,3 +66,30 @@ void generate_key(void) {
 
   output_key(&secret);
 }
+
+static inline void usage(const char *command) {
+  fprintf(stderr, "Usage: %s { -s | -p | -h }\n", command);
+}
+
+void keygen(const char *command, int argc, char **argv) {
+  char c;
+
+  while ((c = getopt(argc, argv, "sph")) != -1) {
+    switch (c) {
+      case 's':
+        generate_key();
+        return;
+
+      case 'p':
+        show_key();
+        return;
+
+      case 'h':
+        usage(command);
+        return;
+    }
+  }
+
+  usage(command);
+  exit(1);
+}

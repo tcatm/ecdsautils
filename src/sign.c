@@ -35,26 +35,59 @@
 #include "hmac_sha256.h"
 #include "sha256_file.h"
 
-/**
- * Performs the first expansion step of HKDF-SHA256 (RFC 5869)
- * (the extraction step is skipped as the secret key is already
- * a uniformly random string, with the exception of the five bits
- * ecc_25519_gf_sanitize_secret sets and clears)
- */
-static void generate_k(uint8_t *k, const uint8_t prk[32], const uint8_t info[32]) {
-  uint8_t input[33];
-  memcpy(input, info, 32);
-  input[32] = 0x01;
 
-  hmac_sha256(k, prk, input, sizeof(input));
+// Generate k according to RFC6979 (Deterministic DSA/ECDSA)
+
+static void generate_k_prepare(uint8_t V[32], uint8_t K[32], const uint8_t x[32], const uint8_t m[32]) {
+  memset(V, 0x01, 32); // b.
+  memset(K, 0x00, 32); // c.
+
+  {
+    uint8_t input[32+1+32+32];
+    memcpy(input, V, 32);
+    input[32] = 0x00;
+    memcpy(input+32+1, x, 32);
+    memcpy(input+32+1+32, m, 32);
+    hmac_sha256(K, K, input, sizeof(input)); // d.
+  }
+
+  hmac_sha256(V, K, V, 32); // e.
+
+  {
+    uint8_t input[32+1+32+32];
+    memcpy(input, V, 32);
+    input[32] = 0x01;
+    memcpy(input+32+1, x, 32);
+    memcpy(input+32+1+32, m, 32);
+    hmac_sha256(K, K, input, sizeof(input)); // f.
+  }
+
+  hmac_sha256(V, K, V, 32); // g.
 }
 
-void sign(int argc, char **argv) {
+static void generate_k(uint8_t k[32], uint8_t V[32], uint8_t K[32]) {
+  // h.
+  // Note that T = V, as qlen = hlen
+  hmac_sha256(V, K, V, 32);
+  memcpy(k, V, 32);
+
+  // The following steps are preparation for the next iteration (in case the generated k is invalid)
+  {
+    uint8_t input[32+1];
+    memcpy(input, V, 32);
+    input[32] = 0x00;
+    hmac_sha256(K, K, input, sizeof(input));
+  }
+  hmac_sha256(V, K, V, 32);
+}
+
+void sign(const char *command, int argc, char **argv) {
   ecc_int256_t secret, hash, k, krecip, r, s, tmp;
   ecc_25519_work_t kG;
+  uint8_t V[32], K[32];
 
   if (argc != 2)
-    exit_error(1, 0, "Usage: ecdsautil sign file (secret is read from stdin)");
+    exit_error(1, 0, "Usage: %s file (secret is read from stdin)", command);
 
   if (!sha256_file(argv[1], tmp.p))
     exit_error(1, 0, "Error while hashing file");
@@ -71,21 +104,24 @@ void sign(int argc, char **argv) {
   ecc_25519_gf_reduce(&hash, &tmp);
 
   // Generate k
-  generate_k(k.p, secret.p, tmp.p);
+  generate_k_prepare(V, K, secret.p, tmp.p);
+
+regenerate:
+  generate_k(k.p, V, K);
   ecc_25519_gf_sanitize_secret(&k, &k);
 
   // calculate k^(-1)
   ecc_25519_gf_recip(&krecip, &k);
 
   // calculate kG = k * base point
-  ecc_25519_scalarmult_base(&kG, &k);
+  ecc_25519_scalarmult(&kG, &k, &ecc_25519_work_base_legacy);
 
   // store x coordinate of kG in r
-  ecc_25519_store_xy(&tmp, NULL, &kG);
+  ecc_25519_store_xy_legacy(&tmp, NULL, &kG);
   ecc_25519_gf_reduce(&r, &tmp);
 
   if (ecc_25519_gf_is_zero(&r))
-    exit_error(1, 0, "Error: r is zero (this should never happen)");
+    goto regenerate;
 
   // tmp = r * secret
   ecc_25519_gf_mult(&tmp, &r, &secret);
@@ -100,7 +136,7 @@ void sign(int argc, char **argv) {
   ecc_25519_gf_reduce(&s, &tmp);
 
   if (ecc_25519_gf_is_zero(&s))
-    exit_error(1, 0, "Error: s is zero (this should never happen)");
+    goto regenerate;
 
   hexdump(stdout, r.p, 32);
   hexdump(stdout, s.p, 32);

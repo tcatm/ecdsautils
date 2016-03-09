@@ -27,3 +27,5 @@
 void show_key(void);
 
 void generate_key(void);
+
+void keygen(const char *command, int argc, char **argv);
