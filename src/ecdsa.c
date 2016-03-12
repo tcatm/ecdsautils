@@ -50,9 +50,6 @@ int ecdsa_is_valid_pubkey(const ecc_25519_work_t *pubkey) {
   // q * pubkey should be identity element
   ecc_25519_scalarmult(&work, &ecc_25519_gf_order, pubkey);
 
-  // FIXME: Check whether pubkey lies on curve?
-  //        If the point was unpacked, it is guaranteed to
-  //        lie on the curve.
   return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
 }
 
