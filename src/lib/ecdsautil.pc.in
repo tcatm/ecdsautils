@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@LIBDIR@
+includedir=${prefix}/include
+
+Name: libecdsautil
+Description: Tiny library to perform ECDSA signing and verification
+Version: @ECDSAUTIL_VERSION@
+Requires: libuecc >= 6
+Libs: -L${libdir} -lecdsautil
+Cflags: -I${includedir}/libecdsautil-@ECDSAUTIL_VERSION@

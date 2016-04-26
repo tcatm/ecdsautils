@@ -1,3 +1,9 @@
+include_directories(${ECDSAUTIL_SOURCE_DIR}/include ${LIBUECC_INCLUDE_DIR})
+
+
+add_subdirectory(lib)
+
+
 ADD_DEFINITIONS(-D_GNU_SOURCE)
 ADD_DEFINITIONS(-DECDSAUTIL_VERSION="${ECDSAUTIL_VERSION}")
 
@@ -31,9 +37,6 @@ IF(${BSD_QSORT_R})
   ADD_DEFINITIONS(-DBSD_QSORT_R)
 ENDIF(${BSD_QSORT_R})
 
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ECDSAUTIL_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR} ${LIBUECC_INCLUDE_DIR})
 
 add_executable(ecdsautil ecdsautil.c keygen.c sign.c verify.c hexutil.c random.c ecdsa.c version.c hmac_sha256.c sha256_file.c sha256sum.c array.c)
 
