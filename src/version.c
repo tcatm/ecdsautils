@@ -23,10 +23,11 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdio.h>
-
 #include "version.h"
 
+#include <stdio.h>
+
+
 void print_version() {
-  puts("ecdsautils " VERSION "\n");
+  puts("ecdsautils " ECDSAUTIL_VERSION "\n");
 }
