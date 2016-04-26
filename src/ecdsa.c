@@ -40,7 +40,7 @@ int ecdsa_new_secret(ecc_int256_t *secret) {
 
 void ecdsa_public_from_secret(ecc_int256_t *pub, const ecc_int256_t *secret) {
   ecc_25519_work_t work;
-  ecc_25519_scalarmult(&work, secret, &ecc_25519_work_base_legacy);
+  ecc_25519_scalarmult_base(&work, secret);
   ecc_25519_store_packed_legacy(pub, &work);
 }
 
@@ -69,7 +69,7 @@ void ecdsa_verify_prepare(ecdsa_verify_context *ctx, const ecc_int256_t *hash, c
   ecc_25519_gf_mult(&u1, &tmp, &w);
   ecc_25519_gf_mult(&ctx->u2, &ctx->r, &w);
 
-  ecc_25519_scalarmult(&ctx->s1, &u1, &ecc_25519_work_base_legacy);
+  ecc_25519_scalarmult_base(&ctx->s1, &u1);
 }
 
 int ecdsa_verify_with_pubkey(const ecdsa_verify_context *ctx, const ecc_25519_work_t *pubkey) {

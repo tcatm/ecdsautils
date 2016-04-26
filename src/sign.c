@@ -114,7 +114,7 @@ regenerate:
   ecc_25519_gf_recip(&krecip, &k);
 
   // calculate kG = k * base point
-  ecc_25519_scalarmult(&kG, &k, &ecc_25519_work_base_legacy);
+  ecc_25519_scalarmult_base(&kG, &k);
 
   // store x coordinate of kG in r
   ecc_25519_store_xy_legacy(&tmp, NULL, &kG);
