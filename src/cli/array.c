@@ -23,16 +23,17 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "array.h"
+
 #include <assert.h>
 #include <stdlib.h>
 
-#include "array.h"
 
-static void *array_index(array *array, int i) {
+static void *array_index(array *array, size_t i) {
   return array->content + array->el_size * i;
 }
 
-int array_init(array *array, size_t size, int n) {
+int array_init(array *array, size_t size, size_t n) {
   array->content = malloc(size * n);
   if (array->content == NULL)
     return 0;
@@ -50,7 +51,7 @@ void array_destroy(array *array) {
   free(array->content);
 }
 
-int array_resize(array *array, int n) {
+int array_resize(array *array, size_t n) {
   assert(array != NULL);
 
   void *p;
@@ -134,7 +135,7 @@ void array_nub(array *array) {
   }
 }
 
-void array_rm(array *array, int i) {
+void array_rm(array *array, size_t i) {
   assert(array != NULL);
 
   if (i >= array->size)

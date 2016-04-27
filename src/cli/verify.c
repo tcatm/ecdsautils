@@ -23,23 +23,26 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "array.h"
+#include "hexutil.h"
+#include "sha256_file.h"
+#include "verify.h"
+
+#include <ecdsautil/ecdsa.h>
+
 #include <stdio.h>
 #include <getopt.h>
 
-#include "verify.h"
-#include "array.h"
-#include "sha256_file.h"
-#include "hexutil.h"
-#include "ecdsa.h"
 
 int verify(const char *command, int argc, char **argv) {
-  unsigned char signature[64];
+  int ret = 1;
+  unsigned char signature[sizeof(ecdsa_signature_t)];
 
   array pubkeys, signatures;
   array_init(&pubkeys, sizeof(ecc_25519_work_t), 5);
   array_init(&signatures, sizeof(signature), 5);
 
-  int min_good_signatures = 1;
+  size_t min_good_signatures = 1;
 
   int opt;
   while ((opt = getopt(argc, argv, "s:p:n:")) != -1) {
@@ -48,14 +51,14 @@ int verify(const char *command, int argc, char **argv) {
 
     switch (opt) {
       case 's':
-        if (!parsehex(signature, optarg, 64)) {
+        if (!parsehex(signature, optarg, sizeof(signature))) {
           fprintf(stderr, "Error while reading signature %s\n", optarg);
           break;
         }
 
         if (!array_add(&signatures, signature, sizeof(signature))) {
           fprintf(stderr, "Error in array_add\n");
-          goto error_out;
+          goto out;
         }
         break;
       case 'p':
@@ -64,18 +67,15 @@ int verify(const char *command, int argc, char **argv) {
           break;
         }
 
-        int ret;
-
-        ret = ecc_25519_load_packed_legacy(&pubkey, &pubkey_packed);
-
-        if (!ret || !ecdsa_is_valid_pubkey(&pubkey)) {
+        int ok = ecc_25519_load_packed_legacy(&pubkey, &pubkey_packed);
+        if (!ok || !ecdsa_is_valid_pubkey(&pubkey)) {
           fprintf(stderr, "Invalid pubkey %s\n", optarg);
           break;
         }
 
         if (!array_add(&pubkeys, &pubkey, sizeof(ecc_25519_work_t))) {
           fprintf(stderr, "Error in array_add\n");
-          goto error_out;
+          goto out;
         }
         break;
       case 'n':
@@ -85,51 +85,32 @@ int verify(const char *command, int argc, char **argv) {
 
   if (optind > argc) {
     fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] [-n num] file\n", command);
-    goto error_out;
+    goto out;
   }
 
   ecc_int256_t hash;
 
   if (!sha256_file((optind <= argc) ? argv[optind] : NULL, hash.p)) {
     fprintf(stderr, "Error while hashing file\n");
-    goto error_out;
+    goto out;
   }
-
-  int good_signatures = 0;
 
   array_nub(&pubkeys);
   array_nub(&signatures);
 
-  for (int i = 0; i < signatures.size; i++) {
-    unsigned char *signature;
-    ecdsa_verify_context ctx;
+  {
+    ecdsa_verify_context_t ctxs[signatures.size];
+    for (size_t i = 0; i < signatures.size; i++)
+      ecdsa_verify_prepare_legacy(&ctxs[i], &hash, ARRAY_INDEX(signatures, i));
 
-    signature = ARRAY_INDEX(signatures, i);
+    size_t good_signatures = ecdsa_verify_list_legacy(ctxs, signatures.size, pubkeys.content, pubkeys.size);
 
-    ecdsa_verify_prepare(&ctx, &hash, signature);
-
-    for (int i = 0; i < pubkeys.size; i++) {
-      ecc_25519_work_t *pubkey;
-      pubkey = ARRAY_INDEX(pubkeys, i);
-
-      if (ecdsa_verify_with_pubkey(&ctx, pubkey)) {
-        good_signatures++;
-        array_rm(&pubkeys, i);
-        break;
-      }
-    }
+    if (good_signatures >= min_good_signatures)
+      ret = 0;
   }
 
+out:
   array_destroy(&pubkeys);
   array_destroy(&signatures);
-
-  if (good_signatures >= min_good_signatures)
-    return 0;
-
-  return 1;
-
-error_out:
-  array_destroy(&pubkeys);
-  array_destroy(&signatures);
-  return 1;
+  return ret;
 }

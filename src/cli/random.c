@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2012, Nils Schneider <nils@nilsschneider.net>
+  and Matthias Schiffer <mschiffer@universe-factory.net>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -22,24 +23,45 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#pragma once
 
-#include <stdlib.h>
+#include "random.h"
+
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
+#include <sys/stat.h>
 
-#define ARRAY_INDEX(array, i) (array.content + array.el_size * i)
+int random_bytes(unsigned char *buffer, size_t len) {
+  int fd;
+  size_t read_bytes = 0;
 
-typedef struct _array {
-  size_t el_size;
-  int limit;
-  int size;
-  void *content;
-} array;
+  fd = open("/dev/random", O_RDONLY);
 
-int array_init(array *array, size_t size, int n);
-void array_destroy(array *array);
-int array_resize(array *array, int n);
-int array_add(array *array, void *el, size_t len);
-void array_sort(array *array);
-void array_nub(array *array);
-void array_rm(array *array, int i);
+  if (fd < 0) {
+    fprintf(stderr, "Can't open /dev/random: %s\n", strerror(errno));
+    goto out_error;
+  }
+
+  while (read_bytes < len) {
+    ssize_t ret = read(fd, buffer + read_bytes, len - read_bytes);
+
+    if (ret < 0) {
+      if (errno == EINTR)
+        continue;
+
+       fprintf(stderr, "Unable to read random bytes: %s\n", strerror(errno));
+       goto out_error;
+    }
+
+    read_bytes += ret;
+  }
+
+  close(fd);
+  return 1;
+
+out_error:
+  close(fd);
+  return 0;
+}

@@ -24,6 +24,9 @@
 */
 #pragma once
 
+#include <stdio.h>
+
+
 /* Converts a string of hexadecimal digits and stores it in a given buffer.
  * In order for this function to return successfully the decoded string
  * must fit exactly into the buffer.

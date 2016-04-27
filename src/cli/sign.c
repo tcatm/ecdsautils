@@ -22,27 +22,40 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#pragma once
 
-#include <libuecc/ecc.h>
+#include "sign.h"
+#include "error.h"
+#include "hexutil.h"
+#include "sha256_file.h"
 
-typedef struct _ecdsa_verify_context {
-   ecc_25519_work_t s1;
-   ecc_int256_t u2;
-   ecc_int256_t r;
-} ecdsa_verify_context;
+#include <ecdsautil/ecdsa.h>
 
-/* Generates a new secret key.
- * 1 on success, else 0
- */
-int ecdsa_new_secret(ecc_int256_t *secret);
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
 
-void ecdsa_public_from_secret(ecc_int256_t *pub, const ecc_int256_t *secret);
 
-int ecdsa_is_valid_pubkey(const ecc_25519_work_t *pubkey);
+void sign(const char *command, int argc, char **argv) {
+  ecdsa_signature_t sig;
+  ecc_int256_t secret, hash;
 
-void ecdsa_split_signature(ecc_int256_t *r, ecc_int256_t *s, const unsigned char *signature);
+  if (argc != 2)
+    exit_error(1, 0, "Usage: %s file (secret is read from stdin)", command);
 
-void ecdsa_verify_prepare(ecdsa_verify_context *ctx, const ecc_int256_t *hash, const unsigned char *signature);
+  if (!sha256_file(argv[1], hash.p))
+    exit_error(1, 0, "Error while hashing file");
 
-int ecdsa_verify_with_pubkey(const ecdsa_verify_context *ctx, const ecc_25519_work_t *pubkey);
+  char secret_string[65];
+
+  if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
+    exit_error(1, 0, "Error reading secret");
+
+  if (!parsehex(secret.p, secret_string, 32))
+    exit_error(1, 0, "Error reading secret");
+
+  ecdsa_sign_legacy(&sig, &hash, &secret);
+
+  hexdump(stdout, sig.r.p, 32);
+  hexdump(stdout, sig.s.p, 32);
+  puts("");
+}

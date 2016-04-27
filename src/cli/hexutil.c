@@ -23,6 +23,8 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "hexutil.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -54,4 +56,3 @@ void hexdump(FILE *stream, unsigned char *buffer, size_t len) {
   while (len--)
     fprintf(stream, "%02hhx", *(buffer++));
 }
-
