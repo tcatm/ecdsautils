@@ -24,6 +24,7 @@
 */
 #pragma once
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,10 +37,10 @@ typedef struct _array {
   void *content;
 } array;
 
-int array_init(array *array, size_t size, size_t n);
+bool array_init(array *array, size_t size, size_t n);
 void array_destroy(array *array);
-int array_resize(array *array, size_t n);
-int array_add(array *array, void *el, size_t len);
+bool array_resize(array *array, size_t n);
+bool array_add(array *array, void *el);
 void array_sort(array *array);
 void array_nub(array *array);
 void array_rm(array *array, size_t i);

@@ -56,7 +56,7 @@ int verify(const char *command, int argc, char **argv) {
           break;
         }
 
-        if (!array_add(&signatures, signature, sizeof(signature))) {
+        if (!array_add(&signatures, signature)) {
           fprintf(stderr, "Error in array_add\n");
           goto out;
         }
@@ -73,7 +73,7 @@ int verify(const char *command, int argc, char **argv) {
           break;
         }
 
-        if (!array_add(&pubkeys, &pubkey, sizeof(ecc_25519_work_t))) {
+        if (!array_add(&pubkeys, &pubkey)) {
           fprintf(stderr, "Error in array_add\n");
           goto out;
         }
