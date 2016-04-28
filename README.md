@@ -88,7 +88,9 @@ called `ecdsautil.pc` is provided for easy compiling and linking against
 libecdsautil.
 
 For API documentation see the public header file `<ecdsautil/ecdsa.h>` (and
-`<ecdsautil/sha256.h>` for the included SHA256 implementation).
+`<ecdsautil/sha256.h>` for the included SHA256 implementation). If you have
+installed Doxygen, `make doxygen` can be used to generated HTML documentation
+of libecdsautil.
 
 libecdsautil does not provide functions for the generate-key and show-key commands,
 as these are already provided by libuecc (see `ecc_25519_gf_sanitize_secret` and
