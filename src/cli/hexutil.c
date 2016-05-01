@@ -1,6 +1,5 @@
 /*
   Copyright (c) 2012, Nils Schneider <nils@nilsschneider.net>
-  and Matthias Schiffer <mschiffer@universe-factory.net>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -24,43 +23,36 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "hexutil.h"
+
 #include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/stat.h>
 
-int random_bytes(unsigned char *buffer, size_t len) {
-  int fd;
-  size_t read_bytes = 0;
+int parsehex(void *buffer, const char *string, size_t len) {
+  // number of digits must be even
+  if ((strlen(string) & 1) == 1)
+    return 0;
 
-  fd = open("/dev/random", O_RDONLY);
+  // number of digits must be 2 * len
+  if (strlen(string) != 2 * len)
+    return 0;
 
-  if (fd < 0) {
-    fprintf(stderr, "Can't open /dev/random: %s\n", strerror(errno));
-    goto out_error;
+  while (len--) {
+    int ret;
+    ret = sscanf(string, "%02hhx", (char*)(buffer++));
+    string += 2;
+
+    if (ret != 1)
+      break;
   }
 
-  while (read_bytes < len) {
-    ssize_t ret = read(fd, buffer + read_bytes, len - read_bytes);
+  if (len != -1)
+    return 0;
 
-    if (ret < 0) {
-      if (errno == EINTR)
-        continue;
-
-       fprintf(stderr, "Unable to read random bytes: %s\n", strerror(errno));
-       goto out_error;
-    }
-
-    read_bytes += ret;
-  }
-
-  close(fd);
   return 1;
-
-out_error:
-  close(fd);
-  return 0;
 }
 
+void hexdump(FILE *stream, unsigned char *buffer, size_t len) {
+  while (len--)
+    fprintf(stream, "%02hhx", *(buffer++));
+}

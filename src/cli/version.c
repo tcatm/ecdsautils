@@ -22,8 +22,12 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#pragma once
 
-#define VERSION "0.3.2"
+#include "version.h"
 
-void print_version();
+#include <stdio.h>
+
+
+void print_version() {
+  puts("ecdsautils " ECDSAUTIL_VERSION "\n");
+}

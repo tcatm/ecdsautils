@@ -1,6 +1,7 @@
 /* The MIT License
 
    Copyright (C) 2011 Zilong Tan (tzlloch@gmail.com)
+   Copyright (C) 2016 Matthias Schiffer (mschiffer@universe-factory.net)
 
    Permission is hereby granted, free of charge, to any person obtaining
    a copy of this software and associated documentation files (the
@@ -23,14 +24,17 @@
    SOFTWARE.
 */
 
-/* 
+/*
  *  Original code is derived from the author:
  *  Allan Saddi
  */
 
-#include <inttypes.h>
+#include <ecdsautil/sha256.h>
+
 #include <string.h>
-#include "sha256sum.h"
+
+
+#define HMAC_BLOCKSIZE 64
 
 #define ROTL(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 #define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
@@ -154,7 +158,7 @@ static const uint8_t padding[64] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-void SHA256Init(SHA256Context * sc)
+void ecdsa_sha256_init(ecdsa_sha256_context_t *sc)
 {
 #ifdef RUNTIME_ENDIAN
 	setEndian();
@@ -182,7 +186,7 @@ static void burnStack(int size)
 		burnStack(size);
 }
 
-static void SHA256Guts(SHA256Context * sc, const uint32_t * cbuf)
+static void SHA256Guts(ecdsa_sha256_context_t *sc, const uint32_t *cbuf)
 {
 	uint32_t buf[64];
 	uint32_t *W, *W2, *W7, *W15, *W16;
@@ -384,7 +388,7 @@ static void SHA256Guts(SHA256Context * sc, const uint32_t * cbuf)
 	sc->hash[7] += h;
 }
 
-void SHA256Update(SHA256Context * sc, const void *data, uint32_t len)
+void ecdsa_sha256_update(ecdsa_sha256_context_t *sc, const void *data, size_t len)
 {
 	uint32_t bufferBytesLeft;
 	uint32_t bytesToCopy;
@@ -435,7 +439,7 @@ void SHA256Update(SHA256Context * sc, const void *data, uint32_t len)
 			  sizeof(int));
 }
 
-void SHA256Final(SHA256Context * sc, uint8_t hash[SHA256_HASH_SIZE])
+void ecdsa_sha256_final(ecdsa_sha256_context_t *sc, uint8_t hash[ECDSA_SHA256_HASH_SIZE])
 {
 	uint32_t bytesToPad;
 	uint64_t lengthPad;
@@ -447,13 +451,39 @@ void SHA256Final(SHA256Context * sc, uint8_t hash[SHA256_HASH_SIZE])
 
 	lengthPad = BYTESWAP64(sc->totalLength);
 
-	SHA256Update(sc, padding, bytesToPad);
-	SHA256Update(sc, &lengthPad, 8L);
+	ecdsa_sha256_update(sc, padding, bytesToPad);
+	ecdsa_sha256_update(sc, &lengthPad, 8L);
 
 	if (hash) {
-		for (i = 0; i < SHA256_HASH_WORDS; i++) {
+		for (i = 0; i < ECDSA_SHA256_HASH_SIZE/4; i++) {
 			*((uint32_t *) hash) = BYTESWAP(sc->hash[i]);
 			hash += 4;
 		}
 	}
+}
+
+void ecdsa_sha256_hmac(uint8_t mac[ECDSA_SHA256_HASH_SIZE], const uint8_t key[ECDSA_HMAC_SHA256_KEY_SIZE], const void *data, size_t len) {
+  uint8_t okey[HMAC_BLOCKSIZE], ikey[HMAC_BLOCKSIZE];
+  uint8_t tmp[ECDSA_SHA256_HASH_SIZE];
+  ecdsa_sha256_context_t ctx;
+  size_t i;
+
+  for (i = 0; i < ECDSA_HMAC_SHA256_KEY_SIZE; i++) {
+    okey[i] = key[i] ^ 0x5c;
+    ikey[i] = key[i] ^ 0x36;
+  }
+  for (i = ECDSA_HMAC_SHA256_KEY_SIZE; i < HMAC_BLOCKSIZE; i++) {
+    okey[i] = 0x5c;
+    ikey[i] = 0x36;
+  }
+
+  ecdsa_sha256_init(&ctx);
+  ecdsa_sha256_update(&ctx, ikey, HMAC_BLOCKSIZE);
+  ecdsa_sha256_update(&ctx, data, len);
+  ecdsa_sha256_final(&ctx, tmp);
+
+  ecdsa_sha256_init(&ctx);
+  ecdsa_sha256_update(&ctx, okey, HMAC_BLOCKSIZE);
+  ecdsa_sha256_update(&ctx, tmp, ECDSA_SHA256_HASH_SIZE);
+  ecdsa_sha256_final(&ctx, mac);
 }

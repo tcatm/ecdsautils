@@ -80,6 +80,23 @@ Signature Format
 concat $ map tohexstring [r, s]
 
 
+libecdsautil
+------------
+
+ecdsautil can easily be embedded into other applications. A pkg-config file
+called `ecdsautil.pc` is provided for easy compiling and linking against
+libecdsautil.
+
+For API documentation see the public header file `<ecdsautil/ecdsa.h>` (and
+`<ecdsautil/sha256.h>` for the included SHA256 implementation). If you have
+installed Doxygen, `make doxygen` can be used to generated HTML documentation
+of libecdsautil.
+
+libecdsautil does not provide functions for the generate-key and show-key commands,
+as these are already provided by libuecc (see `ecc_25519_gf_sanitize_secret` and
+`ecc_25519_scalarmult_base`).
+
+
 Release precedure
 -----------------
 

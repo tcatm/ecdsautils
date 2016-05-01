@@ -1,6 +1,7 @@
 /* The MIT License
 
    Copyright (C) 2011 Zilong Tan (tzlloch@gmail.com)
+   Copyright (C) 2016 Matthias Schiffer (mschiffer@universe-factory.net)
 
    Permission is hereby granted, free of charge, to any person obtaining
    a copy of this software and associated documentation files (the
@@ -24,32 +25,35 @@
 */
 #pragma once
 
-#include <inttypes.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#define SHA256_HASH_SIZE 32	/* 256 bit */
-#define SHA256_HASH_WORDS 8
+/** The number of bytes in a SHA256 hash */
+#define ECDSA_SHA256_HASH_SIZE 32	/* 256 bit */
 
-struct _SHA256Context {
+/** The number of bytes in a HMAC-SHA256 key */
+#define ECDSA_HMAC_SHA256_KEY_SIZE 32
+
+/** SHA256 computation context */
+typedef struct _ecdsa_sha256_context {
 	uint64_t totalLength;
-	uint32_t hash[SHA256_HASH_WORDS];
+	uint32_t hash[ECDSA_SHA256_HASH_SIZE/4];
 	uint32_t bufferLength;
 	union {
 		uint32_t words[16];
 		uint8_t bytes[64];
 	} buffer;
-};
-typedef struct _SHA256Context SHA256Context;
+} ecdsa_sha256_context_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/** Initializes a \ref ecdsa_sha256_context_t */
+void ecdsa_sha256_init(ecdsa_sha256_context_t *sc);
 
-	void SHA256Init(SHA256Context * sc);
+/** Adds data to the given \ref ecdsa_sha256_context_t */
+void ecdsa_sha256_update(ecdsa_sha256_context_t *sc, const void *data, size_t len);
 
-	void SHA256Update(SHA256Context * sc, const void *data, uint32_t len);
+/** Finalizes and outputs a SHA256 hash */
+void ecdsa_sha256_final(ecdsa_sha256_context_t *sc, uint8_t hash[ECDSA_SHA256_HASH_SIZE]);
 
-	void SHA256Final(SHA256Context * sc, uint8_t hash[SHA256_HASH_SIZE]);
 
-#ifdef __cplusplus
-}
-#endif
+/** Computes the HMAC-SHA256 for a block of data */
+void ecdsa_sha256_hmac(uint8_t mac[ECDSA_SHA256_HASH_SIZE], const uint8_t key[ECDSA_HMAC_SHA256_KEY_SIZE], const void *data, size_t len);

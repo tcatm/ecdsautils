@@ -24,12 +24,23 @@
 */
 #pragma once
 
-/* Converts a string of hexadecimal digits and stores it in a given buffer.
- * In order for this function to return successfully the decoded string
- * must fit exactly into the buffer.
- */
-int parsehex(void *buffer, const char *string, size_t len);
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
-/* Converts a byte array to a hexadecimal string.
- */
-void hexdump(FILE *stream, unsigned char *buffer, size_t len);
+#define ARRAY_INDEX(array, i) (array.content + array.el_size * i)
+
+typedef struct _array {
+  size_t el_size;
+  size_t limit;
+  size_t size;
+  void *content;
+} array;
+
+bool array_init(array *array, size_t size, size_t n);
+void array_destroy(array *array);
+bool array_resize(array *array, size_t n);
+bool array_add(array *array, void *el);
+void array_sort(array *array);
+void array_nub(array *array);
+void array_rm(array *array, size_t i);

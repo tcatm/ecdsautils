@@ -23,13 +23,21 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <string.h>
+#include "error.h"
+#include "hexutil.h"
+#include "keygen.h"
+#include "random.h"
+#include "version.h"
+
 #include <libuecc/ecc.h>
 
-#include "random.h"
-#include "ecdsa.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <getopt.h>
 
-int ecdsa_new_secret(ecc_int256_t *secret) {
+
+static int new_secret(ecc_int256_t *secret) {
   if (!random_bytes(secret->p, 32))
     return 0;
 
@@ -38,51 +46,67 @@ int ecdsa_new_secret(ecc_int256_t *secret) {
   return 1;
 }
 
-void ecdsa_public_from_secret(ecc_int256_t *pub, const ecc_int256_t *secret) {
+static void public_from_secret(ecc_int256_t *pub, const ecc_int256_t *secret) {
   ecc_25519_work_t work;
-  ecc_25519_scalarmult(&work, secret, &ecc_25519_work_base_legacy);
+  ecc_25519_scalarmult_base(&work, secret);
   ecc_25519_store_packed_legacy(pub, &work);
 }
 
-int ecdsa_is_valid_pubkey(const ecc_25519_work_t *pubkey) {
-  ecc_25519_work_t work;
-
-  // q * pubkey should be identity element
-  ecc_25519_scalarmult(&work, &ecc_25519_gf_order, pubkey);
-
-  // FIXME: Check whether pubkey lies on curve?
-  //        If the point was unpacked, it is guaranteed to
-  //        lie on the curve.
-  return ecc_25519_is_identity(&work) && !ecc_25519_is_identity(pubkey);
+static void output_key(ecc_int256_t *key) {
+  hexdump(stdout, key->p, 32); puts("");
 }
 
-void ecdsa_split_signature(ecc_int256_t *r, ecc_int256_t *s, const unsigned char *signature) {
-  memcpy(r->p, signature, 32);
-  memcpy(s->p, signature+32, 32);
+void show_key(void) {
+  char secret_string[65];
+  ecc_int256_t pubkey, secret;
+
+  if (fgets(secret_string, sizeof(secret_string), stdin) == NULL)
+    goto secret_error;
+
+  if (!parsehex(secret.p, secret_string, 32))
+    goto secret_error;
+
+  public_from_secret(&pubkey, &secret);
+
+  output_key(&pubkey);
+  return;
+
+secret_error:
+  exit_error(1, 0, "Error reading secret");
 }
 
-void ecdsa_verify_prepare(ecdsa_verify_context *ctx, const ecc_int256_t *hash, const unsigned char *signature) {
-  ecc_int256_t tmp, w, u1;
+void generate_key(void) {
+  ecc_int256_t secret;
 
-  ecdsa_split_signature(&ctx->r, &tmp, signature);
-  ecc_25519_gf_recip(&w, &tmp);
+  if (!new_secret(&secret))
+    exit_error(1, 0, "Unable to read random bytes");
 
-  ecc_25519_gf_reduce(&tmp, hash);
-
-  ecc_25519_gf_mult(&u1, &tmp, &w);
-  ecc_25519_gf_mult(&ctx->u2, &ctx->r, &w);
-
-  ecc_25519_scalarmult(&ctx->s1, &u1, &ecc_25519_work_base_legacy);
+  output_key(&secret);
 }
 
-int ecdsa_verify_with_pubkey(const ecdsa_verify_context *ctx, const ecc_25519_work_t *pubkey) {
-  ecc_25519_work_t s2, work;
-  ecc_int256_t w, tmp;
+static inline void usage(const char *command) {
+  fprintf(stderr, "Usage: %s { -s | -p | -h }\n", command);
+}
 
-  ecc_25519_scalarmult(&s2, &ctx->u2, pubkey);
-  ecc_25519_add(&work, &ctx->s1, &s2);
-  ecc_25519_store_xy_legacy(&w, NULL, &work);
-  ecc_25519_gf_sub(&tmp, &ctx->r, &w);
+void keygen(const char *command, int argc, char **argv) {
+  char c;
 
-  return ecc_25519_gf_is_zero(&tmp);
+  while ((c = getopt(argc, argv, "sph")) != -1) {
+    switch (c) {
+      case 's':
+        generate_key();
+        return;
+
+      case 'p':
+        show_key();
+        return;
+
+      case 'h':
+        usage(command);
+        return;
+    }
+  }
+
+  usage(command);
+  exit(1);
 }

@@ -23,13 +23,16 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "sha256_file.h"
+
+#include <ecdsautil/sha256.h>
+
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 
-#include "sha256sum.h"
 
 #define BLOCKSIZE 64
 
@@ -48,9 +51,9 @@ int sha256_file(const char *fname, unsigned char *hash) {
 
   ssize_t ret;
   unsigned char buffer[BLOCKSIZE];
-  SHA256Context ctx;
+  ecdsa_sha256_context_t ctx;
 
-  SHA256Init(&ctx);
+  ecdsa_sha256_init(&ctx);
 
   while (1) {
     ret = read(fd, buffer, BLOCKSIZE);
@@ -66,10 +69,10 @@ int sha256_file(const char *fname, unsigned char *hash) {
     if (ret == 0)
       break;
 
-    SHA256Update(&ctx, buffer, ret);
+    ecdsa_sha256_update(&ctx, buffer, ret);
   }
 
-  SHA256Final(&ctx, hash);
+  ecdsa_sha256_final(&ctx, hash);
 
   close(fd);
   return 1;
@@ -78,4 +81,3 @@ out_error:
   close(fd);
   return 0;
 }
-

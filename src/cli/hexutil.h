@@ -22,11 +22,17 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#pragma once
 
 #include <stdio.h>
 
-#include "version.h"
 
-void print_version() {
-  puts("ecdsautils " VERSION "\n");
-}
+/* Converts a string of hexadecimal digits and stores it in a given buffer.
+ * In order for this function to return successfully the decoded string
+ * must fit exactly into the buffer.
+ */
+int parsehex(void *buffer, const char *string, size_t len);
+
+/* Converts a byte array to a hexadecimal string.
+ */
+void hexdump(FILE *stream, unsigned char *buffer, size_t len);
