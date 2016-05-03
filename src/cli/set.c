@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2012, Nils Schneider <nils@nilsschneider.net>
+  Copyright (c) 2016, Matthias Schiffer <mschiffer@universe-factory.net>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -23,10 +24,10 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "array.h"
+#include "set.h"
 
 #include <assert.h>
-#include <stdlib.h>
+#include <string.h>
 
 
 static inline bool add_check(size_t *c, size_t a, size_t b) {
@@ -56,135 +57,104 @@ static bool mul_check(size_t *c, size_t a, size_t b) {
 }
 
 
-static void *array_index(array *array, size_t i) {
-  return array->content + array->el_size * i;
+static void *set_index(set *set, size_t i) {
+  return set->content + set->el_size * i;
 }
 
-bool array_init(array *array, size_t size, size_t n) {
+
+bool set_init(set *set, size_t size, size_t n) {
   size_t alloc_size;
   if (!mul_check(&alloc_size, size, n))
     return false;
-  array->content = malloc(alloc_size);
-  if (array->content == NULL)
+  set->content = malloc(alloc_size);
+  if (set->content == NULL)
     return false;
 
-  array->el_size = size;
-  array->limit = n;
-  array->size = 0;
+  set->el_size = size;
+  set->limit = n;
+  set->size = 0;
 
   return true;
 }
 
-void array_destroy(array *array) {
-  assert(array != NULL);
 
-  free(array->content);
+void set_destroy(set *set) {
+  assert(set != NULL);
+
+  free(set->content);
 }
 
-bool array_resize(array *array, size_t n) {
-  assert(array != NULL);
+
+bool set_resize(set *set, size_t n) {
+  assert(set != NULL);
 
   size_t alloc_size;
-  if (!mul_check(&alloc_size, array->el_size, n))
+  if (!mul_check(&alloc_size, set->el_size, n))
     return false;
 
   void *p;
-  p = realloc(array->content, alloc_size);
+  p = realloc(set->content, alloc_size);
 
   if (p == NULL)
     return false;
 
-  array->content = p;
-  array->limit = n;
+  set->content = p;
+  set->limit = n;
 
   return true;
 }
 
-bool array_add(array *array, void *el) {
-  assert(array != NULL);
 
+static bool set_increment_size(set *set) {
   size_t new_size;
-  if (!add_check(&new_size, array->size, 1))
+  if (!add_check(&new_size, set->size, 1))
     return false;
 
-  if (array->limit < new_size) {
+  if (set->limit < new_size) {
     size_t new_limit;
-    if (!mul_check(&new_limit, array->limit, 2))
+    if (!mul_check(&new_limit, set->limit, 2))
       return false;
 
-    int ret = array_resize(array, new_limit);
-    if (!ret)
+    if (!set_resize(set, new_limit))
       return false;
   }
 
-  memcpy(array_index(array, array->size), el, array->el_size);
-  array->size = new_size;
+  set->size = new_size;
 
   return true;
 }
 
-#if defined(LINUX_QSORT_R)
+/*
+  Treats the set as a set, meaning that duplicate elements won't be added.
+  As a side effect, the set is kept sorted.
+*/
+bool set_add(set *set, void *el) {
+  assert(set != NULL);
 
-static int cmparray(const void *p1, const void *p2, void *size) {
-  return memcmp(p1, p2, *(size_t*)size);
-}
+  size_t min = 0, max = set->size;
 
-void array_sort(array *array) {
-  assert(array != NULL);
+  /* Simple binary search */
+	while (max > min) {
+		size_t cur = min + (max - min)/2;
+		int cmp = memcmp(set_index(set, cur), el, set->el_size);
 
-  qsort_r(array->content, array->size, array->el_size, cmparray, &array->el_size);
-}
+		if (cmp == 0)
+			return true; /* We're done here: the element already exists */
+		else if (cmp < 0)
+			max = cur;
+		else
+			min = cur+1;
+	}
 
-#elif defined(BSD_QSORT_R)
+  /* min now holds the place to insert the new value */
 
-static int cmparray(void *size, const void *p1, const void *p2) {
-  return memcmp(p1, p2, *(size_t*)size);
-}
+  size_t rest = set->size - min;
 
-void array_sort(array *array) {
-  assert(array != NULL);
+  if (!set_increment_size(set))
+    return false;
 
-  qsort_r(array->content, array->size, array->el_size, &array->el_size, cmparray);
-}
+  memmove(set_index(set, min+1), set_index(set, min), rest * set->el_size);
+  memcpy(set_index(set, min), el, set->el_size);
 
-#else
-
-#error Unknown qsort_r definition
-
-#endif
-
-void array_nub(array *array) {
-  assert(array != NULL);
-
-  array_sort(array);
-
-  if (array->size < 2)
-    return;
-
-  for (size_t i = 1; i < array->size; i++) {
-    void *e, *p;
-    e = array_index(array, i);
-    p = e - array->el_size;
-
-    if (memcmp(p, e, array->el_size) == 0) {
-      array->size--;
-
-      if (i != array->size) {
-        memmove(e, e + array->el_size, array->el_size * (array->size - i));
-        i--;
-      }
-    }
-  }
-}
-
-void array_rm(array *array, size_t i) {
-  assert(array != NULL);
-  assert(i < array->size);
-
-  array->size--;
-
-  void *e = array_index(array, i);
-  if (i != array->size) {
-    memmove(e, e + array->el_size, array->el_size * (array->size - i));
-  }
+  return true;
 }
