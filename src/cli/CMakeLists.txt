@@ -14,7 +14,7 @@ if(CMAKE_HOST_UNIX)
       COMMAND ln -sf ecdsautil ecdsakeygen
       COMMAND ln -sf ecdsautil ecdsasign
       COMMAND ln -sf ecdsautil ecdsaverify
-      WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin
+      WORKING_DIRECTORY \$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin
     )
   ")
 endif(CMAKE_HOST_UNIX)
