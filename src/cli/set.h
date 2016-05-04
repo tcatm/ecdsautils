@@ -26,21 +26,17 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
-#define ARRAY_INDEX(array, i) (array.content + array.el_size * i)
+#define SET_INDEX(set, i) ((set).content + (set).el_size * (i))
 
-typedef struct _array {
+typedef struct _set {
   size_t el_size;
   size_t limit;
   size_t size;
   void *content;
-} array;
+} set;
 
-bool array_init(array *array, size_t size, size_t n);
-void array_destroy(array *array);
-bool array_resize(array *array, size_t n);
-bool array_add(array *array, void *el);
-void array_sort(array *array);
-void array_nub(array *array);
-void array_rm(array *array, size_t i);
+bool set_init(set *set, size_t size, size_t n);
+void set_destroy(set *set);
+bool set_resize(set *set, size_t n);
+bool set_add(set *set, void *el);

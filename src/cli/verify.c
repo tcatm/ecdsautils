@@ -23,8 +23,8 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "array.h"
 #include "hexutil.h"
+#include "set.h"
 #include "sha256_file.h"
 #include "verify.h"
 
@@ -38,9 +38,9 @@ int verify(const char *command, int argc, char **argv) {
   int ret = 1;
   unsigned char signature[sizeof(ecdsa_signature_t)];
 
-  array pubkeys, signatures;
-  array_init(&pubkeys, sizeof(ecc_25519_work_t), 5);
-  array_init(&signatures, sizeof(signature), 5);
+  set pubkeys, signatures;
+  set_init(&pubkeys, sizeof(ecc_25519_work_t), 5);
+  set_init(&signatures, sizeof(signature), 5);
 
   size_t min_good_signatures = 1;
 
@@ -56,7 +56,7 @@ int verify(const char *command, int argc, char **argv) {
           break;
         }
 
-        if (!array_add(&signatures, signature)) {
+        if (!set_add(&signatures, signature)) {
           fprintf(stderr, "Error in array_add\n");
           goto out;
         }
@@ -73,7 +73,7 @@ int verify(const char *command, int argc, char **argv) {
           break;
         }
 
-        if (!array_add(&pubkeys, &pubkey)) {
+        if (!set_add(&pubkeys, &pubkey)) {
           fprintf(stderr, "Error in array_add\n");
           goto out;
         }
@@ -95,13 +95,10 @@ int verify(const char *command, int argc, char **argv) {
     goto out;
   }
 
-  array_nub(&pubkeys);
-  array_nub(&signatures);
-
   {
     ecdsa_verify_context_t ctxs[signatures.size];
     for (size_t i = 0; i < signatures.size; i++)
-      ecdsa_verify_prepare_legacy(&ctxs[i], &hash, ARRAY_INDEX(signatures, i));
+      ecdsa_verify_prepare_legacy(&ctxs[i], &hash, SET_INDEX(signatures, i));
 
     size_t good_signatures = ecdsa_verify_list_legacy(ctxs, signatures.size, pubkeys.content, pubkeys.size);
 
@@ -110,7 +107,7 @@ int verify(const char *command, int argc, char **argv) {
   }
 
 out:
-  array_destroy(&pubkeys);
-  array_destroy(&signatures);
+  set_destroy(&pubkeys);
+  set_destroy(&signatures);
   return ret;
 }
