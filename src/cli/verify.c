@@ -83,7 +83,7 @@ int verify(const char *command, int argc, char **argv) {
     }
   }
 
-  if (optind > argc) {
+  if (optind > argc || pubkeys.size == 0 || signatures.size == 0) {
     fprintf(stderr, "Usage: %s [-s signature ...] [-p pubkey ...] [-n num] file\n", command);
     goto out;
   }
